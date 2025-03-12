@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import Draggable from 'react-draggable';
@@ -117,6 +117,7 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const t = useTranslation();
+  const nodeRef = useRef(null);
 
   const deviceReadonly = useDeviceReadonly();
 
@@ -177,8 +178,9 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
         {device && (
           <Draggable
             handle={`.${classes.media}, .${classes.header}`}
+            nodeRef={nodeRef}
           >
-            <Card elevation={3} className={classes.card}>
+            <Card ref={nodeRef} elevation={3} className={classes.card}>
               {deviceImage ? (
                 <CardMedia
                   className={classes.media}

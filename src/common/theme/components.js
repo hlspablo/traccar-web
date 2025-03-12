@@ -4,6 +4,13 @@ export default {
       noSsr: true,
     },
   },
+  MuiPaper: {
+    styleOverrides: {
+      root: ({ theme }) => ({
+        backgroundColor: theme.palette.mode === 'dark' ? '#000' : '#f5f5f5',
+      }),
+    },
+  },
   MuiOutlinedInput: {
     styleOverrides: {
       root: ({ theme }) => ({

@@ -6,9 +6,10 @@ export default (server, darkMode) => ({
   mode: darkMode ? 'dark' : 'light',
   background: {
     default: darkMode ? grey[900] : grey[50],
+    paper: darkMode ? grey[800] : '#f5f5f5',
   },
   primary: {
-    main: validatedColor(server?.attributes?.colorPrimary) || (darkMode ? indigo[200] : indigo[900]),
+    main: validatedColor(server?.attributes?.colorPrimary) || (darkMode ? indigo[100] : indigo[900]),
   },
   secondary: {
     main: validatedColor(server?.attributes?.colorSecondary) || (darkMode ? green[200] : green[800]),

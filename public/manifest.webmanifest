@@ -1,11 +1,11 @@
 {
-  "short_name": "Traccar",
-  "name": "Traccar GPS Tracking System",
-  "theme_color": "#1a237e",
+  "short_name": "Coragem Rastro",
+  "name": "Coragem Rastro | De olho no seu veículo",
+  "theme_color": "#000",
   "icons": [
     {
-      "src": "pwa-64x64.png",
-      "sizes": "64x64",
+      "src": "pwa-72x72.png",
+      "sizes": "72x72",
       "type": "image/png"
     },
     {

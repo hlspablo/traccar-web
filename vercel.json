@@ -61,7 +61,7 @@
   "rewrites": [
     {
       "source": "/api/socket",
-      "destination": "http://coragemserver.top/api/socket"
+      "destination": "https://coragemserver.top/api/socket"
     },
     {
       "source": "/api/(.*)",

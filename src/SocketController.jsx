@@ -33,7 +33,8 @@ const SocketController = () => {
   const features = useFeatures();
 
   const connectSocket = () => {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    // const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const protocol = 'ws:';
     const socket = new WebSocket(`${protocol}//${window.location.host}/api/socket`);
     socketRef.current = socket;
 

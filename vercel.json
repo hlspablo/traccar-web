@@ -59,17 +59,8 @@
     }
   ],
   "rewrites": [
-    {
-      "source": "/api/socket",
-      "destination": "https://coragemserver.top/api/socket"
-    },
-    {
-      "source": "/api/(.*)",
-      "destination": "/api"
-    },
-    {
-      "source": "/((?!api/).*)",
-      "destination": "/index.html"
-    }
+    {"source": "/api/socket", "destination": "http://coragemserver.top/api/socket"},
+    {"source": "/api/:path*", "destination": "http://coragemserver.top/api/:path*"},
+    {"source": "/(.*)", "destination": "/index.html"}
   ]
 }

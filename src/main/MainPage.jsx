@@ -1,5 +1,5 @@
 import React, {
-  useState, useCallback, useEffect,
+  useState, useEffect,
 } from 'react';
 import { Paper } from '@mui/material';
 import { makeStyles } from '@mui/styles';
@@ -11,7 +11,6 @@ import BottomMenu from '../common/components/BottomMenu';
 import StatusCard from '../common/components/StatusCard';
 import { devicesActions } from '../store';
 import usePersistedState from '../common/util/usePersistedState';
-import EventsDrawer from './EventsDrawer';
 import useFilter from './useFilter';
 import MainToolbar from './MainToolbar';
 import MainMap from './MainMap';
@@ -87,9 +86,6 @@ const MainPage = () => {
   const [filterMap, setFilterMap] = usePersistedState('filterMap', false);
 
   const [devicesOpen, setDevicesOpen] = useState(desktop);
-  const [eventsOpen, setEventsOpen] = useState(false);
-
-  const onEventsClick = useCallback(() => setEventsOpen(true), [setEventsOpen]);
 
   useEffect(() => {
     if (!desktop && mapOnSelect && selectedDeviceId) {
@@ -105,7 +101,6 @@ const MainPage = () => {
         <MainMap
           filteredPositions={filteredPositions}
           selectedPosition={selectedPosition}
-          onEventsClick={onEventsClick}
         />
       )}
       <div className={classes.sidebar}>
@@ -130,7 +125,6 @@ const MainPage = () => {
               <MainMap
                 filteredPositions={filteredPositions}
                 selectedPosition={selectedPosition}
-                onEventsClick={onEventsClick}
               />
             </div>
           )}
@@ -144,7 +138,6 @@ const MainPage = () => {
           </div>
         )}
       </div>
-      <EventsDrawer open={eventsOpen} onClose={() => setEventsOpen(false)} />
       {selectedDeviceId && (
         <StatusCard
           deviceId={selectedDeviceId}

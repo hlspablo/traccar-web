@@ -5,18 +5,15 @@ import {
   Paper, BottomNavigation, BottomNavigationAction, Badge,
 } from '@mui/material';
 
-import DescriptionIcon from '@mui/icons-material/Description';
 import MapIcon from '@mui/icons-material/Map';
 
 import { useTranslation } from './LocalizationProvider';
-import { useRestriction } from '../util/permissions';
 
 const BottomMenu = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const t = useTranslation();
 
-  const disableReports = useRestriction('disableReports');
   const socket = useSelector((state) => state.session.socket);
 
   const currentSelection = () => {
@@ -53,9 +50,6 @@ const BottomMenu = () => {
           )}
           value="map"
         />
-        {!disableReports && (
-          <BottomNavigationAction label={t('reportTitle')} icon={<DescriptionIcon />} value="reports" />
-        )}
       </BottomNavigation>
     </Paper>
   );

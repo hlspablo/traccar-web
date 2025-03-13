@@ -1,28 +1,53 @@
 // Create a proxy to redirect requests from '/api/*' to 'http://coragemserver.top/api/*'
-const { createProxyMiddleware } = require('http-proxy-middleware');
+import http from 'http';
+import { URL } from 'url';
 
-// Create the proxy middleware
-const apiProxy = createProxyMiddleware({
-  target: 'http://coragemserver.top',
-  changeOrigin: true,
-  ws: true, // Support WebSockets
-  secure: false,
-  onProxyRes(proxyRes) {
-    // Add CORS headers if needed
-    proxyRes.headers['Access-Control-Allow-Origin'] = '*';
-    proxyRes.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS';
-    proxyRes.headers['Access-Control-Allow-Headers'] = 'Authorization, Content-Type';
-  },
-});
-
-// Expose the proxy on the '/api/*' endpoint
-export default function handler(req, res) {
-  // Don't allow direct access to this URL in browser
+export default async function handler(req, res) {
+  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
     res.status(200).end();
     return;
   }
 
-  // Use apiProxy and don't return a value
-  apiProxy(req, res);
+  // Parse the target URL
+  const targetUrl = new URL(req.url, 'https://coragemserver.top');
+
+  // Forward the request
+  const proxyReq = http.request({
+    hostname: 'coragemserver.top',
+    port: 80,
+    path: targetUrl.pathname + targetUrl.search,
+    method: req.method,
+    headers: {
+      ...req.headers,
+      host: 'coragemserver.top',
+    },
+  }, (proxyRes) => {
+    // Forward the response headers
+    res.writeHead(proxyRes.statusCode, {
+      ...proxyRes.headers,
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Authorization, Content-Type',
+    });
+
+    // Forward the response body
+    proxyRes.pipe(res);
+  });
+
+  // Handle proxy errors
+  proxyReq.on('error', (error) => {
+    console.error('Proxy error:', error);
+    res.status(500).json({ error: 'Proxy error' });
+  });
+
+  // Forward the request body if any
+  if (req.body) {
+    proxyReq.write(req.body);
+  }
+
+  proxyReq.end();
 }

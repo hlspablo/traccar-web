@@ -1,144 +1,87 @@
-// Create a proxy to redirect requests from '/api/*' to 'http://coragemserver.top/api/*'
-import http from 'http';
-import { URL } from 'url';
-import getRawBody from 'raw-body';
+// Production-ready API proxy implementation
+import { createProxyMiddleware } from 'http-proxy-middleware';
 
-export default async function handler(req, res) {
-  // Handle CORS preflight
+// Create proxy configuration - modify target as needed
+const apiProxy = createProxyMiddleware({
+  target: 'http://coragemserver.top',
+  changeOrigin: true,
+  ws: true, // Enable WebSocket support
+  pathRewrite: undefined, // Keep the original path (don't rewrite)
+  secure: false, // Don't verify SSL certificates
+
+  // Log proxy activity - customize as needed
+  logLevel: process.env.NODE_ENV === 'production' ? 'silent' : 'warn',
+
+  // Add optional CORS headers to responses
+  onProxyRes: (proxyRes, req) => {
+    // Add CORS headers
+    proxyRes.headers['Access-Control-Allow-Origin'] = '*';
+    proxyRes.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS';
+    proxyRes.headers['Access-Control-Allow-Headers'] = 'Authorization, Content-Type, Accept';
+
+    // Optional logging in non-production
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`[Proxy] ${req.method} ${req.url} -> ${proxyRes.statusCode}`);
+    }
+  },
+
+  // Handle WebSocket proxy errors
+  onError: (err, req, res) => {
+    console.error('[Proxy Error]', err);
+    if (!res.headersSent && res.writeHead) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Proxy Error', message: err.message }));
+    }
+  },
+
+  // Optionally modify request headers before sending to target
+  onProxyReq: (proxyReq) => {
+    // Add custom headers if needed
+    proxyReq.setHeader('X-Forwarded-By', 'Vercel Proxy');
+
+    // If you need to add authentication or modify other headers, do it here
+    // Example: proxyReq.setHeader('Authorization', `Bearer ${process.env.API_TOKEN}`);
+  },
+});
+
+// Tell Next.js this is an API route that:
+// 1. Is handled by an external resolver (http-proxy-middleware)
+// 2. Should not parse the body (to preserve raw request body for the proxy)
+export const config = {
+  api: {
+    bodyParser: false,
+    externalResolver: true,
+  },
+};
+
+/**
+ * API Route handler function - processes all requests under /api/*
+ */
+export default function handler(req, res) {
+  // Special handling for OPTIONS requests (CORS preflight)
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
+    res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type, Accept');
+    res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours cache for preflight
     res.status(200).end();
     return;
   }
 
-  // Parse the target URL
-  const targetUrl = new URL(req.url, 'http://coragemserver.top');
-
-  // Prepare headers - clone headers but remove host and connection
-  const headers = { ...req.headers };
-  delete headers.host;
-  delete headers.connection;
-
-  // Set appropriate headers for the target
-  headers.host = 'coragemserver.top';
-
-  try {
-    // Handle raw body for uploading files and multipart forms
-    let rawBody;
-    let bodyIsStream = false;
-
-    // Check if we need to handle the body (POST, PUT, PATCH methods)
-    if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
-      const contentTypeHeader = req.headers['content-type'];
-
-      if (contentTypeHeader) {
-        // Check if it's a multipart form (likely a file upload)
-        if (contentTypeHeader.includes('multipart/form-data')) {
-          bodyIsStream = true;
-        } else if (contentTypeHeader.includes('image/')
-                || contentTypeHeader.includes('audio/')
-                || contentTypeHeader.includes('video/')
-                || contentTypeHeader.includes('application/octet-stream')) {
-          // Check if it's a binary content type
-          bodyIsStream = true;
-        } else if (!req.body && (
-          contentTypeHeader.includes('application/json')
-          || contentTypeHeader.includes('application/x-www-form-urlencoded')
-        )) {
-          // For JSON or form-urlencoded, we already have req.body in most cases
-          // If req.body is not available, get the raw body
-          try {
-            rawBody = await getRawBody(req);
-          } catch (error) {
-            console.error('Error reading request body:', error);
-          }
-        }
-      }
+  // Process the request with our proxy middleware
+  apiProxy(req, res, (err) => {
+    // This function is called when the proxy middleware doesn't handle the request
+    // This could be due to an error or because the middleware didn't match the request
+    if (err) {
+      console.error('Proxy middleware error:', err);
+      res.status(500).json({ error: 'Proxy Error', message: err.message });
+      return;
     }
 
-    // Create proxy request options
-    const options = {
-      hostname: 'coragemserver.top',
-      port: 80,
-      path: targetUrl.pathname + targetUrl.search,
-      method: req.method,
-      headers,
-    };
-
-    // Create the proxy request
-    const proxyReq = http.request(options);
-
-    // Forward the original request to the target
-    await new Promise((resolve, reject) => {
-      // Set up proxy response handler
-      proxyReq.on('response', (proxyRes) => {
-        // Forward status code and headers
-        res.statusCode = proxyRes.statusCode;
-
-        // Add CORS headers
-        const responseHeaders = {
-          ...proxyRes.headers,
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Authorization, Content-Type',
-        };
-
-        // Set headers on response
-        Object.keys(responseHeaders).forEach((key) => {
-          res.setHeader(key, responseHeaders[key]);
-        });
-
-        // Pipe proxy response to client response
-        proxyRes.pipe(res);
-        proxyRes.on('end', resolve);
-      });
-
-      // Handle proxy request errors
-      proxyReq.on('error', (err) => {
-        console.error('Proxy request error:', err);
-        if (!res.headersSent) {
-          res.status(500).json({ error: 'Proxy request failed' });
-        }
-        reject(err);
-      });
-
-      // Handle request body differently based on content type
-      if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
-        if (bodyIsStream) {
-          // For multipart forms and binary data, pipe the request stream directly
-          req.pipe(proxyReq);
-        } else if (rawBody) {
-          // If we captured the raw body earlier, write it directly
-          proxyReq.write(rawBody);
-          proxyReq.end();
-        } else if (req.body) {
-          // For JSON and other structured data
-          try {
-            const bodyStr = typeof req.body === 'object'
-              ? JSON.stringify(req.body)
-              : String(req.body);
-
-            proxyReq.write(bodyStr);
-            proxyReq.end();
-          } catch (e) {
-            console.error('Error processing body:', e);
-            proxyReq.end();
-          }
-        } else {
-          // No body detected
-          proxyReq.end();
-        }
-      } else {
-        // For methods without body (GET, DELETE, etc.)
-        proxyReq.end();
-      }
+    // If we get here, something went wrong with the proxy
+    res.status(404).json({
+      error: 'Not Found',
+      message: `Request '${req.url}' could not be proxied to the target server.`,
     });
-  } catch (error) {
-    console.error('Proxy error:', error);
-    if (!res.headersSent) {
-      res.status(500).json({ error: 'Failed to proxy request' });
-    }
-  }
+  });
 }

@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import Draggable from 'react-draggable';
 import {
@@ -18,19 +18,11 @@ import {
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import CloseIcon from '@mui/icons-material/Close';
-import ReplayIcon from '@mui/icons-material/Replay';
-import PublishIcon from '@mui/icons-material/Publish';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
 import PendingIcon from '@mui/icons-material/Pending';
 
 import { useTranslation } from './LocalizationProvider';
-import RemoveDialog from './RemoveDialog';
 import PositionValue from './PositionValue';
-import { useDeviceReadonly } from '../util/permissions';
 import usePositionAttributes from '../attributes/usePositionAttributes';
-import { devicesActions } from '../../store';
-import { useCatch, useCatchCallback } from '../../reactHelper';
 import { useAttributePreference } from '../util/preferences';
 
 const useStyles = makeStyles((theme) => ({
@@ -59,9 +51,6 @@ const useStyles = makeStyles((theme) => ({
     paddingBottom: theme.spacing(1),
     maxHeight: theme.dimensions.cardContentMaxHeight,
     overflow: 'auto',
-  },
-  delete: {
-    color: theme.palette.error.main,
   },
   icon: {
     width: '25px',
@@ -112,17 +101,12 @@ const StatusRow = ({ name, content }) => {
   );
 };
 
-const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPadding = 0 }) => {
+const StatusCard = ({ deviceId, position, onClose, desktopPadding = 0 }) => {
   const classes = useStyles({ desktopPadding });
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const t = useTranslation();
   const nodeRef = useRef(null);
 
-  const deviceReadonly = useDeviceReadonly();
-
-  const shareDisabled = useSelector((state) => state.session.server.attributes.disableShare);
-  const user = useSelector((state) => state.session.user);
   const device = useSelector((state) => state.devices.items[deviceId]);
 
   const deviceImage = device?.attributes?.deviceImage;
@@ -131,46 +115,6 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
   const positionItems = useAttributePreference('positionItems', 'fixTime,address,speed,totalDistance');
 
   const [anchorEl, setAnchorEl] = useState(null);
-
-  const [removing, setRemoving] = useState(false);
-
-  const handleRemove = useCatch(async (removed) => {
-    if (removed) {
-      const response = await fetch('/api/devices');
-      if (response.ok) {
-        dispatch(devicesActions.refresh(await response.json()));
-      } else {
-        throw Error(await response.text());
-      }
-    }
-    setRemoving(false);
-  });
-
-  const handleGeofence = useCatchCallback(async () => {
-    const newItem = {
-      name: t('sharedGeofence'),
-      area: `CIRCLE (${position.latitude} ${position.longitude}, 50)`,
-    };
-    const response = await fetch('/api/geofences', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newItem),
-    });
-    if (response.ok) {
-      const item = await response.json();
-      const permissionResponse = await fetch('/api/permissions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ deviceId: position.deviceId, geofenceId: item.id }),
-      });
-      if (!permissionResponse.ok) {
-        throw Error(await permissionResponse.text());
-      }
-      navigate(`/settings/geofence/${item.id}`);
-    } else {
-      throw Error(await response.text());
-    }
-  }, [navigate, position]);
 
   return (
     <>
@@ -237,31 +181,6 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
                 >
                   <PendingIcon />
                 </IconButton>
-                <IconButton
-                  onClick={() => navigate('/replay')}
-                  disabled={disableActions || !position}
-                >
-                  <ReplayIcon />
-                </IconButton>
-                <IconButton
-                  onClick={() => navigate(`/settings/device/${deviceId}/command`)}
-                  disabled={disableActions}
-                >
-                  <PublishIcon />
-                </IconButton>
-                <IconButton
-                  onClick={() => navigate(`/settings/device/${deviceId}`)}
-                  disabled={disableActions || deviceReadonly}
-                >
-                  <EditIcon />
-                </IconButton>
-                <IconButton
-                  onClick={() => setRemoving(true)}
-                  disabled={disableActions || deviceReadonly}
-                  className={classes.delete}
-                >
-                  <DeleteIcon />
-                </IconButton>
               </CardActions>
             </Card>
           </Draggable>
@@ -270,19 +189,11 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
       {position && (
         <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
           <MenuItem onClick={() => navigate(`/position/${position.id}`)}><Typography color="secondary">{t('sharedShowDetails')}</Typography></MenuItem>
-          <MenuItem onClick={handleGeofence}>{t('sharedCreateGeofence')}</MenuItem>
           <MenuItem component="a" target="_blank" href={`https://www.google.com/maps/search/?api=1&query=${position.latitude}%2C${position.longitude}`}>{t('linkGoogleMaps')}</MenuItem>
           <MenuItem component="a" target="_blank" href={`http://maps.apple.com/?ll=${position.latitude},${position.longitude}`}>{t('linkAppleMaps')}</MenuItem>
           <MenuItem component="a" target="_blank" href={`https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${position.latitude}%2C${position.longitude}&heading=${position.course}`}>{t('linkStreetView')}</MenuItem>
-          {!shareDisabled && !user.temporary && <MenuItem onClick={() => navigate(`/settings/device/${deviceId}/share`)}>{t('deviceShare')}</MenuItem>}
         </Menu>
       )}
-      <RemoveDialog
-        open={removing}
-        endpoint="devices"
-        itemId={deviceId}
-        onResult={(removed) => handleRemove(removed)}
-      />
     </>
   );
 };

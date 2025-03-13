@@ -2,7 +2,6 @@ import React from 'react';
 import {
   Divider, List, ListItemButton, ListItemIcon, ListItemText,
 } from '@mui/material';
-import SettingsIcon from '@mui/icons-material/Settings';
 import CreateIcon from '@mui/icons-material/Create';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import FolderIcon from '@mui/icons-material/Folder';
@@ -47,12 +46,6 @@ const SettingsMenu = () => {
   return (
     <>
       <List>
-        <MenuItem
-          title={t('sharedPreferences')}
-          link="/settings/preferences"
-          icon={<SettingsIcon />}
-          selected={location.pathname === '/settings/preferences'}
-        />
         {!readonly && (
           <>
             <MenuItem

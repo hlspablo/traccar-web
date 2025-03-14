@@ -102,15 +102,13 @@
 
     React.useEffect(() => {
       if (initialized) {
-        const url = window.location.protocol + '//' + window.location.host;
-        
         // Extract token from URL if present
         const urlParams = new URLSearchParams(window.location.search);
         const token = urlParams.get('token');
         const tokenParam = token ? `?token=${token}` : '';
         
-        // Create WebSocket connection with token parameter if available
-        const socket = new WebSocket('ws' + url.substring(4) + '/api/socket' + tokenParam);
+        // Connect directly to the backend server instead of using the proxy
+        const socket = new WebSocket(`wss://coragemserver.top/api/socket${tokenParam}`);
         
         socket.onmessage = (event) => {
           const data = JSON.parse(event.data);

@@ -33,24 +33,20 @@ const SocketController = () => {
   const features = useFeatures();
 
   const connectSocket = () => {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-
     // Extract token from URL if present
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
     const tokenParam = token ? `?token=${token}` : '';
 
-    // Create WebSocket connection with token parameter if available
-    const socket = new WebSocket(`${protocol}//${window.location.host}/api/socket${tokenParam}`);
+    // Connect directly to the backend server instead of using the proxy
+    const socket = new WebSocket(`wss://coragemserver.top/api/socket${tokenParam}`);
     socketRef.current = socket;
 
     socket.onopen = () => {
-      console.log('WebSocket connection established');
       dispatch(sessionActions.updateSocket(true));
     };
 
     socket.onclose = async (event) => {
-      console.log(`WebSocket connection closed with code: ${event.code}`);
       dispatch(sessionActions.updateSocket(false));
       if (event.code !== logoutCode) {
         try {

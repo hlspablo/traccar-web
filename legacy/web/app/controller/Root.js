@@ -241,17 +241,15 @@ Ext.define('Traccar.controller.Root', {
     },
 
     asyncUpdate: function (first) {
-        var self = this, protocol, pathname, socket;
-        protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        pathname = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+        var self = this, socket;
         
         // Extract token from URL if present
         var urlParams = new URLSearchParams(window.location.search);
         var token = urlParams.get('token');
         var tokenParam = token ? '?token=' + token : '';
         
-        // Create WebSocket connection with token parameter if available
-        socket = new WebSocket(protocol + '//' + window.location.host + pathname + 'api/socket' + tokenParam);
+        // Connect directly to the backend server instead of using the proxy
+        socket = new WebSocket('wss://coragemserver.top/api/socket' + tokenParam);
 
         socket.onclose = function () {
             Ext.Ajax.request({

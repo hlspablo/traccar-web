@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import dayjs from 'dayjs';
 import {
-  useMediaQuery, Select, MenuItem, FormControl, Button, TextField, Link, Snackbar, IconButton, Tooltip, Box,
+  useMediaQuery, Select, MenuItem, FormControl, Button, TextField, Link, Snackbar, IconButton, Box,
 } from '@mui/material';
 import ReactCountryFlag from 'react-country-flag';
 import makeStyles from '@mui/styles/makeStyles';
 import CloseIcon from '@mui/icons-material/Close';
-import LockOpenIcon from '@mui/icons-material/LockOpen';
 import { useTheme } from '@mui/material/styles';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -14,7 +12,7 @@ import { sessionActions } from '../store';
 import { useLocalization, useTranslation } from '../common/components/LocalizationProvider';
 import LoginLayout from './LoginLayout';
 import usePersistedState from '../common/util/usePersistedState';
-import { handleLoginTokenListeners, nativeEnvironment, nativePostMessage } from '../common/components/NativeInterface';
+import { handleLoginTokenListeners, nativePostMessage } from '../common/components/NativeInterface';
 import LogoImage from './LogoImage';
 import { useCatch } from '../reactHelper';
 import Loader from '../common/components/Loader';
@@ -66,7 +64,6 @@ const LoginPage = () => {
 
   const registrationEnabled = useSelector((state) => state.session.server.registration);
   const languageEnabled = useSelector((state) => !state.session.server.attributes['ui.disableLoginLanguage']);
-  const changeEnabled = useSelector((state) => !state.session.server.attributes.disableChange);
   const emailEnabled = useSelector((state) => state.session.server.emailEnabled);
   const openIdEnabled = useSelector((state) => state.session.server.openIdEnabled);
   const openIdForced = useSelector((state) => state.session.server.openIdEnabled && state.session.server.openIdForce);
@@ -74,25 +71,6 @@ const LoginPage = () => {
 
   const [announcementShown, setAnnouncementShown] = useState(false);
   const announcement = useSelector((state) => state.session.server.announcement);
-
-  const generateLoginToken = async () => {
-    if (nativeEnvironment) {
-      let token = '';
-      try {
-        const expiration = dayjs().add(6, 'months').toISOString();
-        const response = await fetch('/api/session/token', {
-          method: 'POST',
-          body: new URLSearchParams(`expiration=${expiration}`),
-        });
-        if (response.ok) {
-          token = await response.text();
-        }
-      } catch (error) {
-        token = '';
-      }
-      nativePostMessage(`login|${token}`);
-    }
-  };
 
   const handlePasswordLogin = async (event) => {
     event.preventDefault();
@@ -105,9 +83,9 @@ const LoginPage = () => {
       });
       if (response.ok) {
         const user = await response.json();
-        generateLoginToken();
+        const { token } = user;
         dispatch(sessionActions.updateUser(user));
-        navigate('/');
+        navigate(`/?token=${token}`);
       } else if (response.status === 401 && response.headers.get('WWW-Authenticate') === 'TOTP') {
         setCodeEnabled(true);
       } else {
@@ -150,13 +128,6 @@ const LoginPage = () => {
   return (
     <LoginLayout>
       <div className={classes.options}>
-        {nativeEnvironment && changeEnabled && (
-          <Tooltip title={t('settingsServer')}>
-            <IconButton onClick={() => navigate('/change-server')}>
-              <LockOpenIcon />
-            </IconButton>
-          </Tooltip>
-        )}
         {languageEnabled && (
           <FormControl>
             <Select value={language} onChange={(e) => setLanguage(e.target.value)}>

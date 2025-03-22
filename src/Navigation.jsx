@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffectAsync } from 'react';
 import {
   Route, Routes,
 } from 'react-router-dom';
@@ -7,16 +7,29 @@ import App from './App';
 import LoginPage from './login/LoginPage';
 import RegisterPage from './login/RegisterPage';
 import ResetPasswordPage from './login/ResetPasswordPage';
+import useQuery from './common/util/useQuery';
 
-const Navigation = () => (
-  <Routes>
-    <Route path="/login" element={<LoginPage />} />
-    <Route path="/register" element={<RegisterPage />} />
-    <Route path="/reset-password" element={<ResetPasswordPage />} />
-    <Route path="/" element={<App />}>
-      <Route index element={<MainPage />} />
-    </Route>
-  </Routes>
-);
+const Navigation = () => {
+  const query = useQuery();
+
+  useEffectAsync(async () => {
+    if (query.get('token')) {
+      const token = query.get('token');
+      await fetch(`/api/session?token=${encodeURIComponent(token)}`);
+      // navigate(pathname);
+    }
+  }, [query]);
+
+  return (
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/" element={<App />}>
+        <Route index element={<MainPage />} />
+      </Route>
+    </Routes>
+  );
+};
 
 export default Navigation;

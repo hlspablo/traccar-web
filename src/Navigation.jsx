@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   Route, Routes,
-  useLocation, useNavigate,
+  useNavigate,
 } from 'react-router-dom';
 import MainPage from './main/MainPage';
 import App from './App';
@@ -13,14 +13,13 @@ import { useEffectAsync } from './reactHelper';
 
 const Navigation = () => {
   const query = useQuery();
-  const { pathname } = useLocation();
   const navigate = useNavigate();
 
   useEffectAsync(async () => {
     if (query.get('token')) {
       const token = query.get('token');
       await fetch(`/api/session?token=${encodeURIComponent(token)}`);
-      navigate(pathname);
+      navigate(`/?token=${token}`);
     }
   }, [query]);
 

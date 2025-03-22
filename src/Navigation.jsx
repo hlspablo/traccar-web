@@ -1,4 +1,4 @@
-import React, { useEffectAsync } from 'react';
+import React from 'react';
 import {
   Route, Routes,
   useLocation, useNavigate,
@@ -9,6 +9,7 @@ import LoginPage from './login/LoginPage';
 import RegisterPage from './login/RegisterPage';
 import ResetPasswordPage from './login/ResetPasswordPage';
 import useQuery from './common/util/useQuery';
+import { useEffectAsync } from './reactHelper';
 
 const Navigation = () => {
   const query = useQuery();

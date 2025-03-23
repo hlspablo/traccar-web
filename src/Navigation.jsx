@@ -8,6 +8,7 @@ import App from './App';
 import LoginPage from './login/LoginPage';
 import RegisterPage from './login/RegisterPage';
 import ResetPasswordPage from './login/ResetPasswordPage';
+import PrivacyPage from './login/PrivacyPage';
 import useQuery from './common/util/useQuery';
 import { useEffectAsync } from './reactHelper';
 
@@ -28,6 +29,7 @@ const Navigation = () => {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/privacy" element={<PrivacyPage />} />
       <Route path="/" element={<App />}>
         <Route index element={<MainPage />} />
       </Route>

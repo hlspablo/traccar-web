@@ -6,6 +6,7 @@ import {
 } from '@mui/material';
 import MapIcon from '@mui/icons-material/Map';
 import LogoutIcon from '@mui/icons-material/Logout';
+import ReceiptIcon from '@mui/icons-material/Receipt';
 import { useTranslation } from './LocalizationProvider';
 import { sessionActions } from '../../store';
 
@@ -23,7 +24,7 @@ const BottomMenu = () => {
 
   return (
     <Paper square elevation={3}>
-      <BottomNavigation value="map" onChange={() => navigate('/')} showLabels>
+      <BottomNavigation value="map" onChange={(e, v) => v !== 'logout' && v !== 'billing' && navigate('/')} showLabels>
         <BottomNavigationAction
           label={t('mapTitle')}
           icon={(
@@ -32,6 +33,16 @@ const BottomMenu = () => {
             </Badge>
           )}
           value="map"
+        />
+        <BottomNavigationAction
+          label="Faturamento"
+          icon={(
+            <Badge color="error" variant="dot" overlap="circular" invisible={socket !== false}>
+              <ReceiptIcon />
+            </Badge>
+          )}
+          onClick={() => navigate('/billing')}
+          value="billing"
         />
         <BottomNavigationAction
           onClick={handleLogout}
@@ -44,7 +55,6 @@ const BottomMenu = () => {
           value="logout"
         />
       </BottomNavigation>
-
     </Paper>
   );
 };

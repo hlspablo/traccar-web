@@ -12,6 +12,7 @@ import NativeInterface from './common/components/NativeInterface';
 import ServerProvider from './ServerProvider';
 import ErrorBoundary from './ErrorBoundary';
 import AppThemeProvider from './AppThemeProvider';
+import { AuthProvider } from './common/util/AuthContext';
 
 preloadImages();
 
@@ -24,9 +25,11 @@ root.render(
           <AppThemeProvider>
             <CssBaseline />
             <ServerProvider>
-              <BrowserRouter>
-                <Navigation />
-              </BrowserRouter>
+              <AuthProvider>
+                <BrowserRouter>
+                  <Navigation />
+                </BrowserRouter>
+              </AuthProvider>
               <ErrorHandler />
               <NativeInterface />
             </ServerProvider>

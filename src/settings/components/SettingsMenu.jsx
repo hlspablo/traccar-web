@@ -14,6 +14,7 @@ import PublishIcon from '@mui/icons-material/Publish';
 import SmartphoneIcon from '@mui/icons-material/Smartphone';
 import HelpIcon from '@mui/icons-material/Help';
 import CampaignIcon from '@mui/icons-material/Campaign';
+import ReceiptIcon from '@mui/icons-material/Receipt';
 import { Link, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useTranslation } from '../../common/components/LocalizationProvider';
@@ -65,6 +66,12 @@ const SettingsMenu = () => {
               link="/settings/devices"
               icon={<SmartphoneIcon />}
               selected={location.pathname.startsWith('/settings/device')}
+            />
+            <MenuItem
+              title="Faturamento"
+              link="/billing"
+              icon={<ReceiptIcon />}
+              selected={location.pathname === '/billing'}
             />
             <MenuItem
               title={t('sharedGeofences')}

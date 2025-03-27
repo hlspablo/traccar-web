@@ -18,7 +18,7 @@ import {
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import { useAuth } from '../common/util/AuthContext';
-import { devicesActions, sessionActions } from '../store';
+import { devicesActions } from '../store';
 
 import Logo from '../resources/images/coragem-logo.png';
 
@@ -59,31 +59,59 @@ const useStyles = makeStyles((theme) => ({
   tableContainer: {
     marginTop: theme.spacing(3),
     marginBottom: theme.spacing(3),
+    borderRadius: theme.shape.borderRadius,
+    overflow: 'hidden',
+    boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
   },
   table: {
     minWidth: 350,
   },
   tableHead: {
-    backgroundColor: theme.palette.primary.main,
+    backgroundColor: theme.palette.primary.dark,
+    borderTopLeftRadius: theme.shape.borderRadius,
+    borderTopRightRadius: theme.shape.borderRadius,
   },
   tableHeadCell: {
     color: '#fff',
     fontWeight: 'bold',
+    fontSize: '1.1rem',
+    letterSpacing: '0.5px',
+    padding: theme.spacing(1.5, 2),
+    textTransform: 'uppercase',
+    textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
   },
   tableRow: {
     '&:nth-of-type(odd)': {
       backgroundColor: 'rgba(255, 255, 255, 0.05)',
     },
+    '&:hover': {
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    },
+  },
+  tableCell: {
+    color: '#f0f0f0',
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    fontSize: '1rem',
+  },
+  tableCellAmount: {
+    fontWeight: 'bold',
+    color: '#f0f0f0',
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    fontSize: '1rem',
   },
   totalCard: {
-    backgroundColor: theme.palette.primary.main,
+    backgroundColor: theme.palette.primary.dark,
     color: '#fff',
     marginTop: theme.spacing(3),
     textAlign: 'center',
+    borderRadius: theme.shape.borderRadius,
+    boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
   },
   totalValue: {
     fontWeight: 'bold',
-    fontSize: '1.5rem',
+    fontSize: '1.8rem',
+    textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
+    padding: theme.spacing(1),
   },
 }));
 
@@ -94,13 +122,11 @@ const BillingPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [devicesLoaded, setDevicesLoaded] = useState(false);
-  const [positionsLoaded, setPositionsLoaded] = useState(false);
 
   // Use the AuthContext instead of direct Redux access for authentication
   const { authChecked, isAuthenticated, user } = useAuth();
 
   const devices = useSelector((state) => state.devices.items);
-  const positions = useSelector((state) => state.session.positions);
 
   // First effect for authentication check
   useEffect(() => {
@@ -145,56 +171,14 @@ const BillingPage = () => {
     }
   }, [isAuthenticated, devices, dispatch, devicesLoaded]);
 
-  // Third effect to fetch positions after devices are loaded
-  useEffect(() => {
-    const fetchPositions = async () => {
-      try {
-        if (isAuthenticated && devicesLoaded && devices && Object.keys(devices).length > 0) {
-          // Check if positions are already loaded
-          const deviceIds = Object.keys(devices);
-          const allPositionsLoaded = deviceIds.every((id) => positions && positions[id]);
-
-          if (!allPositionsLoaded) {
-            // Get all device IDs to fetch positions
-            const deviceIdParam = deviceIds.join(',');
-            const positionsResponse = await fetch(`/api/positions?deviceId=${deviceIdParam}`);
-
-            if (positionsResponse.ok) {
-              const fetchedPositions = await positionsResponse.json();
-              const positionsMap = {};
-
-              // Create a positions map by device ID
-              fetchedPositions.forEach((position) => {
-                positionsMap[position.deviceId] = position;
-              });
-
-              dispatch(sessionActions.updatePositions(positionsMap));
-            }
-          }
-        }
-        setPositionsLoaded(true);
-      } catch (err) {
-        console.error('Error fetching positions:', err);
-        setError('Erro ao carregar posições. Por favor, tente novamente mais tarde.');
-        setPositionsLoaded(true);
-      }
-    };
-
-    if (isAuthenticated && devicesLoaded && !positionsLoaded) {
-      fetchPositions();
-    }
-  }, [isAuthenticated, devicesLoaded, devices, positions, dispatch, positionsLoaded]);
-
   // Show loading while authentication is being checked or devices are loading
-  if (!authChecked || loading || !devicesLoaded || !positionsLoaded) {
+  if (!authChecked || loading || !devicesLoaded) {
     let loadingMessage = 'Carregando informações de faturamento...';
 
     if (!authChecked) {
       loadingMessage = 'Verificando autenticação...';
     } else if (!devicesLoaded) {
       loadingMessage = 'Carregando dispositivos...';
-    } else if (!positionsLoaded) {
-      loadingMessage = 'Carregando dados de posição...';
     }
 
     return (
@@ -259,9 +243,8 @@ const BillingPage = () => {
   let total = 0;
   try {
     devicesArray.forEach((device) => {
-      const position = positions[device.id];
-      if (position && position.attributes && position.attributes.valor) {
-        const valor = parseFloat(position.attributes.valor) || 0;
+      if (device.attributes && device.attributes.valor) {
+        const valor = parseFloat(device.attributes.valor) || 0;
         if (!Number.isNaN(valor)) {
           total += valor;
         }
@@ -312,17 +295,16 @@ const BillingPage = () => {
             <TableBody>
               {devicesArray.map((device) => {
                 try {
-                  const position = positions[device.id];
-                  const plano = position?.attributes?.plano || 'Básico';
-                  const valor = position?.attributes?.valor || 0;
+                  const plano = device.attributes?.plano || 'Básico';
+                  const valor = device.attributes?.valor || 0;
 
                   return (
                     <TableRow key={device.id} className={classes.tableRow}>
-                      <TableCell component="th" scope="row">
+                      <TableCell component="th" scope="row" className={classes.tableCell}>
                         {device.name}
                       </TableCell>
-                      <TableCell>{plano}</TableCell>
-                      <TableCell align="right">
+                      <TableCell className={classes.tableCell}>{plano}</TableCell>
+                      <TableCell align="right" className={classes.tableCellAmount}>
                         {parseFloat(valor).toLocaleString('pt-BR', {
                           style: 'currency',
                           currency: 'BRL',
@@ -334,11 +316,11 @@ const BillingPage = () => {
                   console.error(`Error rendering device ${device.id}:`, err);
                   return (
                     <TableRow key={device.id} className={classes.tableRow}>
-                      <TableCell component="th" scope="row">
+                      <TableCell component="th" scope="row" className={classes.tableCell}>
                         {device.name}
                       </TableCell>
-                      <TableCell>Erro</TableCell>
-                      <TableCell align="right">-</TableCell>
+                      <TableCell className={classes.tableCell}>Erro</TableCell>
+                      <TableCell align="right" className={classes.tableCellAmount}>-</TableCell>
                     </TableRow>
                   );
                 }

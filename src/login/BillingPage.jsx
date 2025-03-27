@@ -184,7 +184,6 @@ const BillingPage = () => {
         }
         setDevicesLoaded(true);
       } catch (err) {
-        console.error('Error fetching devices:', err);
         setError('Erro ao carregar dispositivos. Por favor, tente novamente mais tarde.');
         setDevicesLoaded(true);
       }
@@ -279,7 +278,6 @@ const BillingPage = () => {
     });
   } catch (err) {
     setError('Erro ao calcular o total. Por favor, tente novamente mais tarde.');
-    console.error('Error calculating total:', err);
   }
 
   return (
@@ -342,7 +340,6 @@ const BillingPage = () => {
                     </TableRow>
                   );
                 } catch (err) {
-                  console.error(`Error rendering device ${device.id}:`, err);
                   return (
                     <TableRow key={device.id} className={classes.tableRow}>
                       <TableCell component="th" scope="row" className={classes.tableCell}>

@@ -33,6 +33,18 @@ const useStyles = makeStyles((theme) => ({
     textAlign: 'center',
     marginBottom: '20px !important',
     color: '#fff',
+    fontFamily: '"Montserrat", "Roboto", "Helvetica", "Arial", sans-serif',
+    fontWeight: 700,
+    letterSpacing: '0.5px',
+  },
+  userHeader: {
+    textAlign: 'center',
+    marginBottom: '30px !important',
+    color: '#fff',
+    fontFamily: '"Open Sans", "Roboto", "Helvetica", "Arial", sans-serif',
+    fontSize: '1.2rem',
+    fontWeight: 400,
+    opacity: 0.9,
   },
   section: {
     marginBottom: theme.spacing(3),
@@ -45,8 +57,10 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(4),
     maxWidth: theme.spacing(100),
     margin: '0 auto',
-    backgroundColor: '#000',
+    backgroundColor: '#1E1E2F',
     color: '#fff',
+    borderRadius: theme.shape.borderRadius,
+    boxShadow: '0 8px 16px rgba(0,0,0,0.3)',
   },
   image: {
     alignSelf: 'center',
@@ -67,7 +81,7 @@ const useStyles = makeStyles((theme) => ({
     minWidth: 350,
   },
   tableHead: {
-    backgroundColor: theme.palette.primary.dark,
+    backgroundColor: '#4D7AF7',
     borderTopLeftRadius: theme.shape.borderRadius,
     borderTopRightRadius: theme.shape.borderRadius,
   },
@@ -79,39 +93,49 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(1.5, 2),
     textTransform: 'uppercase',
     textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
+    fontFamily: '"Montserrat", "Roboto", "Helvetica", "Arial", sans-serif',
   },
   tableRow: {
     '&:nth-of-type(odd)': {
-      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+      backgroundColor: 'rgba(77, 122, 247, 0.05)',
     },
     '&:hover': {
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      backgroundColor: 'rgba(77, 122, 247, 0.1)',
     },
   },
   tableCell: {
     color: '#f0f0f0',
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: 'rgba(77, 122, 247, 0.2)',
     fontSize: '1rem',
+    fontFamily: '"Open Sans", "Roboto", "Helvetica", "Arial", sans-serif',
   },
   tableCellAmount: {
     fontWeight: 'bold',
     color: '#f0f0f0',
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: 'rgba(77, 122, 247, 0.2)',
     fontSize: '1rem',
+    fontFamily: '"Open Sans", "Roboto", "Helvetica", "Arial", sans-serif',
   },
   totalCard: {
-    backgroundColor: theme.palette.primary.dark,
+    backgroundColor: '#4D7AF7',
     color: '#fff',
     marginTop: theme.spacing(3),
     textAlign: 'center',
     borderRadius: theme.shape.borderRadius,
     boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
   },
+  totalTitle: {
+    fontFamily: '"Montserrat", "Roboto", "Helvetica", "Arial", sans-serif',
+    fontSize: '1.3rem',
+    fontWeight: 600,
+    marginBottom: theme.spacing(1),
+  },
   totalValue: {
     fontWeight: 'bold',
     fontSize: '1.8rem',
     textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
     padding: theme.spacing(1),
+    fontFamily: '"Montserrat", "Roboto", "Helvetica", "Arial", sans-serif',
   },
 }));
 
@@ -225,7 +249,7 @@ const BillingPage = () => {
             Resumo de Faturamento
           </Typography>
 
-          <Typography variant="h6" className={classes.header}>
+          <Typography variant="h6" className={classes.userHeader}>
             {user.name || user.email}
           </Typography>
 
@@ -273,7 +297,7 @@ const BillingPage = () => {
           Resumo de Faturamento
         </Typography>
 
-        <Typography variant="h6" className={classes.header}>
+        <Typography variant="h6" className={classes.userHeader}>
           {user.name || user.email}
         </Typography>
 
@@ -331,7 +355,7 @@ const BillingPage = () => {
 
         <Card className={classes.totalCard}>
           <CardContent>
-            <Typography variant="h5">
+            <Typography variant="h5" className={classes.totalTitle}>
               Total
             </Typography>
             <Typography className={classes.totalValue}>

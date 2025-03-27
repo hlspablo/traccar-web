@@ -81,12 +81,12 @@ const useStyles = makeStyles((theme) => ({
     minWidth: 350,
   },
   tableHead: {
-    backgroundColor: '#4D7AF7',
+    backgroundColor: '#000',
     borderTopLeftRadius: theme.shape.borderRadius,
     borderTopRightRadius: theme.shape.borderRadius,
   },
   tableHeadCell: {
-    color: '#fff',
+    color: '#000',
     fontWeight: 'bold',
     fontSize: '1.1rem',
     letterSpacing: '0.5px',
@@ -213,6 +213,7 @@ const BillingPage = () => {
           alignItems: 'center',
           justifyContent: 'center',
           minHeight: '100vh',
+          width: '100%',
           p: 4,
           bgcolor: '#ffffff',
         }}
@@ -239,12 +240,14 @@ const BillingPage = () => {
           alignItems: 'center',
           p: 4,
           bgcolor: '#ffffff',
+          minHeight: '100vh',
+          width: '100%',
         }}
       >
         <Box sx={{ mb: 4 }}>
           <img className={classes.image} src={Logo} alt="Logo" />
         </Box>
-        <Paper className={classes.paper} elevation={3} sx={{ bgcolor: '#000' }}>
+        <Paper className={classes.paper} elevation={3}>
           <Typography variant="h4" className={classes.header}>
             Resumo de Faturamento
           </Typography>
@@ -287,12 +290,14 @@ const BillingPage = () => {
         alignItems: 'center',
         p: 4,
         bgcolor: '#ffffff',
+        minHeight: '100vh',
+        width: '100%',
       }}
     >
       <Box sx={{ mb: 4 }}>
         <img className={classes.image} src={Logo} alt="Logo" />
       </Box>
-      <Paper className={classes.paper} elevation={3} sx={{ bgcolor: '#000' }}>
+      <Paper className={classes.paper} elevation={3}>
         <Typography variant="h4" className={classes.header}>
           Resumo de Faturamento
         </Typography>
@@ -319,7 +324,7 @@ const BillingPage = () => {
             <TableBody>
               {devicesArray.map((device) => {
                 try {
-                  const plano = device.attributes?.plano || 'Básico';
+                  const plano = device.attributes?.plano || 'Falha ao carregar plano';
                   const valor = device.attributes?.valor || 0;
 
                   return (

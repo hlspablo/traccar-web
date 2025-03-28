@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Table, TableRow, TableCell, TableHead, TableBody, TableFooter, FormControlLabel, Switch,
+  Snackbar, Alert,
 } from '@mui/material';
 import LinkIcon from '@mui/icons-material/Link';
 import { useEffectAsync } from '../reactHelper';
@@ -15,6 +16,7 @@ import TableShimmer from '../common/components/TableShimmer';
 import { useManager } from '../common/util/permissions';
 import SearchHeader, { filterByKeyword } from './components/SearchHeader';
 import useSettingsStyles from './common/useSettingsStyles';
+import AsaasAPI from '../common/util/AsaasAPI';
 
 const SubscriptionsPage = () => {
   const classes = useSettingsStyles();
@@ -28,6 +30,7 @@ const SubscriptionsPage = () => {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showExpired, setShowExpired] = useState(false);
+  const [error, setError] = useState(null);
 
   const actionDetails = {
     key: 'details',
@@ -36,57 +39,36 @@ const SubscriptionsPage = () => {
     handler: (subscriptionId) => navigate(`/settings/subscription/${subscriptionId}/details`),
   };
 
-  // Mock data setup for demonstration
+  // Convert Asaas API subscription data to our app's format
+  const mapSubscriptionData = (apiData) => apiData.map((subscription) => ({
+    id: subscription.id,
+    name: subscription.description || `Subscription #${subscription.id}`,
+    type: subscription.cycle,
+    price: subscription.value,
+    status: subscription.status.toLowerCase(),
+    features: subscription.description,
+    customer: subscription.customer,
+    externalReference: subscription.externalReference,
+    creationTime: subscription.dateCreated,
+    expirationTime: subscription.nextDueDate,
+  }));
+
+  // Fetch subscriptions from Asaas API
   useEffectAsync(async () => {
     setLoading(true);
+    setError(null);
     try {
-      // This would be an actual API call in production
-      // const response = await fetch('/api/subscriptions');
-      // if (response.ok) {
-      //   setItems(await response.json());
-      // } else {
-      //   throw Error(await response.text());
-      // }
-
-      // Mock data for UI development
-      setTimeout(() => {
-        const mockSubscriptions = [
-          {
-            id: 1,
-            name: 'Basic Plan',
-            type: 'Monthly',
-            price: 9.99,
-            status: 'active',
-            features: 'Basic tracking',
-            creationTime: '2023-01-15T00:00:00.000Z',
-            expirationTime: '2024-01-15T00:00:00.000Z',
-          },
-          {
-            id: 2,
-            name: 'Premium Plan',
-            type: 'Annual',
-            price: 99.99,
-            status: 'active',
-            features: 'Advanced tracking, reports',
-            creationTime: '2023-02-20T00:00:00.000Z',
-            expirationTime: '2024-02-20T00:00:00.000Z',
-          },
-          {
-            id: 3,
-            name: 'Enterprise Plan',
-            type: 'Monthly',
-            price: 29.99,
-            status: 'expired',
-            features: 'Full access',
-            creationTime: '2023-03-10T00:00:00.000Z',
-            expirationTime: '2023-10-10T00:00:00.000Z',
-          },
-        ];
-        setItems(mockSubscriptions);
-        setLoading(false);
-      }, 1000);
-    } catch (error) {
-      console.error(error);
+      const response = await AsaasAPI.getSubscriptions();
+      if (response && response.data) {
+        const mappedData = mapSubscriptionData(response.data);
+        setItems(mappedData);
+      } else {
+        setError('Invalid response format from API');
+      }
+    } catch (err) {
+      console.error(err);
+      setError(AsaasAPI.handleError(err) || 'Failed to fetch subscriptions');
+    } finally {
       setLoading(false);
     }
   }, [timestamp]);
@@ -101,7 +83,8 @@ const SubscriptionsPage = () => {
             <TableCell>{t('subscriptionType')}</TableCell>
             <TableCell>{t('subscriptionPrice')}</TableCell>
             <TableCell>{t('subscriptionStatus')}</TableCell>
-            <TableCell>{t('subscriptionFeatures')}</TableCell>
+            <TableCell>{t('userEmail')}</TableCell>
+            <TableCell>{t('sharedReference')}</TableCell>
             <TableCell>{t('subscriptionExpirationTime')}</TableCell>
             <TableCell className={classes.columnAction} />
           </TableRow>
@@ -114,11 +97,12 @@ const SubscriptionsPage = () => {
                 <TableCell>{item.name}</TableCell>
                 <TableCell>{item.type}</TableCell>
                 <TableCell>
-                  $
-                  {item.price}
+                  R$
+                  {item.price.toFixed(2)}
                 </TableCell>
-                <TableCell>{item.status}</TableCell>
-                <TableCell>{item.features}</TableCell>
+                <TableCell>{t(`subscriptionStatus${item.status.charAt(0).toUpperCase() + item.status.slice(1)}`)}</TableCell>
+                <TableCell>{item.customer}</TableCell>
+                <TableCell>{item.externalReference || '-'}</TableCell>
                 <TableCell>{formatTime(item.expirationTime, 'date')}</TableCell>
                 <TableCell className={classes.columnAction} padding="none">
                   <CollectionActions
@@ -130,11 +114,11 @@ const SubscriptionsPage = () => {
                   />
                 </TableCell>
               </TableRow>
-            )) : (<TableShimmer columns={7} endAction />)}
+            )) : (<TableShimmer columns={8} endAction />)}
         </TableBody>
         <TableFooter>
           <TableRow>
-            <TableCell colSpan={7} align="right">
+            <TableCell colSpan={8} align="right">
               <FormControlLabel
                 control={(
                   <Switch
@@ -151,6 +135,18 @@ const SubscriptionsPage = () => {
         </TableFooter>
       </Table>
       <CollectionFab editPath="/settings/subscription" />
+
+      {/* Error notification */}
+      <Snackbar
+        open={!!error}
+        autoHideDuration={6000}
+        onClose={() => setError(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={() => setError(null)} severity="error" sx={{ width: '100%' }}>
+          {error}
+        </Alert>
+      </Snackbar>
     </PageLayout>
   );
 };

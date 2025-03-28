@@ -652,5 +652,8 @@
     "selectUserFirst": "Please select a user first",
     "planName": "Plan Name",
     "planValue": "Plan Value",
-    "userSubscriptions": "User Subscriptions"
+    "userSubscriptions": "User Subscriptions",
+    "viewSubscription": "View Subscription",
+    "userPhone": "User Phone",
+    "planDescription": "Plan Description"
 }

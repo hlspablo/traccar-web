@@ -207,7 +207,7 @@ const ViewSubscriptionPage = () => {
                     </Typography>
                   </Grid>
                   <Grid item xs={12} sm={6} md={4}>
-                    <Typography variant="subtitle2">{t('planName')}</Typography>
+                    <Typography variant="subtitle2">{t('planDescription')}</Typography>
                     <Typography variant="body1">
                       {subscription.description || '-'}
                     </Typography>

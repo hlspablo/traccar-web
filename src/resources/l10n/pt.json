@@ -629,5 +629,6 @@
     "subscriptionDetails": "Detalhes",
     "subscriptionAllowReports": "Permitir Relatórios",
     "subscriptionAllowCommands": "Permitir Comandos",
-    "subscriptionAllowNotifications": "Permitir Notificações"
+    "subscriptionAllowNotifications": "Permitir Notificações",
+    "userPhone": "Telemóvel"
 }

@@ -197,7 +197,7 @@ const SubscriptionsByUser = () => {
             </Card>
           )}
 
-          <Typography variant="h6" gutterBottom>
+          <Typography variant="h6" gutterBottom sx={{ ml: 2 }}>
             {t('settingsSubscriptions')}
           </Typography>
 
@@ -241,7 +241,7 @@ const SubscriptionsByUser = () => {
                       </Typography>
                     </Grid>
                     <Grid item xs={12} sm={6} md={4}>
-                      <Typography variant="subtitle2">{t('planName')}</Typography>
+                      <Typography variant="subtitle2">{t('planDescription')}</Typography>
                       <Typography variant="body1">
                         {subscription.description || '-'}
                       </Typography>
@@ -256,10 +256,10 @@ const SubscriptionsByUser = () => {
                       <Box mt={2} display="flex" justifyContent="flex-end">
                         <Button
                           variant="contained"
-                          color="primary"
+                          color="secondary"
                           onClick={() => handleViewSubscription(subscription.id)}
                         >
-                          {t('sharedView')}
+                          {t('viewSubscription')}
                         </Button>
                       </Box>
                     </Grid>

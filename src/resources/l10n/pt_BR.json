@@ -652,5 +652,8 @@
     "selectUserFirst": "Por favor, selecione um usuário primeiro",
     "planName": "Nome do Plano",
     "planValue": "Valor do Plano",
-    "userSubscriptions": "Assinaturas do Usuário"
+    "userSubscriptions": "Assinaturas do Usuário",
+    "viewSubscription": "Ver Assinatura",
+    "userPhone": "Celular",
+    "planDescription": "Descrição do Plano"
 }

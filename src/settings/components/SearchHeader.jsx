@@ -1,5 +1,7 @@
 import React from 'react';
-import { TextField, useTheme, useMediaQuery } from '@mui/material';
+import {
+  TextField, useTheme, useMediaQuery, Box,
+} from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import { useTranslation } from '../../common/components/LocalizationProvider';
 
@@ -10,29 +12,46 @@ const useStyles = makeStyles((theme) => ({
     position: 'sticky',
     left: 0,
     display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'stretch',
+    flexDirection: 'row',
+    alignItems: 'center',
     padding: theme.spacing(3, 2, 2),
+  },
+  searchField: {
+    flexGrow: 1,
   },
 }));
 
-const SearchHeader = ({ keyword, setKeyword }) => {
+const SearchHeader = ({ keyword, setKeyword, children }) => {
   const theme = useTheme();
   const classes = useStyles();
   const t = useTranslation();
 
   const phone = useMediaQuery(theme.breakpoints.down('sm'));
 
-  return phone ? (
-    <div className={classes.header}>
-      <TextField
-        variant="outlined"
-        placeholder={t('sharedSearch')}
-        value={keyword}
-        onChange={(e) => setKeyword(e.target.value)}
-      />
-    </div>
-  ) : '';
+  if (phone) {
+    return (
+      <div className={classes.header}>
+        <TextField
+          className={classes.searchField}
+          variant="outlined"
+          placeholder={t('sharedSearch')}
+          value={keyword}
+          onChange={(e) => setKeyword(e.target.value)}
+        />
+        {children}
+      </div>
+    );
+  }
+
+  if (children) {
+    return (
+      <Box className={classes.header}>
+        {children}
+      </Box>
+    );
+  }
+
+  return null;
 };
 
 export default SearchHeader;

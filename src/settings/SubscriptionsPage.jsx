@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Table, TableRow, TableCell, TableHead, TableBody, TableFooter, FormControlLabel, Switch,
-  Snackbar, Alert,
+  Snackbar, Alert, Button,
 } from '@mui/material';
 import LinkIcon from '@mui/icons-material/Link';
-import { useEffectAsync } from '../reactHelper';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { formatTime } from '../common/util/formatter';
 import { useTranslation } from '../common/components/LocalizationProvider';
 import PageLayout from '../common/components/PageLayout';
@@ -54,28 +54,61 @@ const SubscriptionsPage = () => {
   }));
 
   // Fetch subscriptions from Asaas API
-  useEffectAsync(async () => {
+  const fetchData = async () => {
     setLoading(true);
     setError(null);
     try {
+      console.log('Fetching subscriptions...');
       const response = await AsaasAPI.getSubscriptions();
+      console.log('API response:', response);
+
       if (response && response.data) {
         const mappedData = mapSubscriptionData(response.data);
         setItems(mappedData);
+        console.log('Subscriptions loaded:', mappedData.length);
       } else {
+        console.error('Invalid API response:', response);
         setError('Invalid response format from API');
       }
     } catch (err) {
-      console.error(err);
-      setError(AsaasAPI.handleError(err) || 'Failed to fetch subscriptions');
+      console.error('Subscription fetch error:', err);
+      setError(err.message || 'Failed to fetch subscriptions');
     } finally {
       setLoading(false);
     }
+  };
+
+  // Load data when component mounts or when timestamp changes
+  useEffect(() => {
+    fetchData();
   }, [timestamp]);
+
+  // Handle refresh button click
+  const handleRefresh = () => {
+    setTimestamp(Date.now());
+  };
 
   return (
     <PageLayout menu={<SettingsMenu />} breadcrumbs={['settingsTitle', 'settingsSubscriptions']}>
-      <SearchHeader keyword={searchKeyword} setKeyword={setSearchKeyword} />
+      <SearchHeader keyword={searchKeyword} setKeyword={setSearchKeyword}>
+        <Button
+          variant="outlined"
+          color="primary"
+          onClick={handleRefresh}
+          startIcon={<RefreshIcon />}
+          sx={{ ml: 2 }}
+          disabled={loading}
+        >
+          {t('sharedRefresh')}
+        </Button>
+      </SearchHeader>
+      {error && (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          Using proxy endpoint for API calls.
+          {' '}
+          {error}
+        </Alert>
+      )}
       <Table className={classes.table}>
         <TableHead>
           <TableRow>

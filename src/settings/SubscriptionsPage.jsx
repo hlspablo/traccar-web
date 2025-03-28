@@ -120,7 +120,7 @@ const SubscriptionsPage = () => {
             .map((item) => (
               <TableRow key={item.id}>
                 <TableCell>{item.id}</TableCell>
-                <TableCell>{item.type}</TableCell>
+                <TableCell>{t(`subscriptionCycle${item.type.charAt(0).toUpperCase() + item.type.slice(1).toLowerCase()}`)}</TableCell>
                 <TableCell>
                   R$
                   {item.price.toFixed(2)}

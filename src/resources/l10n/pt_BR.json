@@ -636,5 +636,12 @@
     "externalReference": "Referência",
     "nextDueDate": "Próximo Pagamento",
     "subscriptionCycle": "Ciclo",
+    "subscriptionCycleWeekly": "Semanal",
+    "subscriptionCycleBiweekly": "Quinzenal",
+    "subscriptionCycleMonthly": "Mensal",
+    "subscriptionCycleBimonthly": "Bimestral",
+    "subscriptionCycleQuarterly": "Trimestral",
+    "subscriptionCycleSemiannually": "Semestral",
+    "subscriptionCycleYearly": "Anual",
     "clientId": "ID Cliente"
 }

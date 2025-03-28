@@ -23,7 +23,6 @@ import SettingsMenu from './components/SettingsMenu';
 import SelectUserField from '../common/components/SelectUserField';
 import SelectDeviceField from '../common/components/SelectDeviceField';
 import useSettingsStyles from './common/useSettingsStyles';
-import AsaasAPI from '../common/util/AsaasAPI';
 
 const SubscriptionPage = () => {
   const classes = useSettingsStyles();
@@ -35,24 +34,6 @@ const SubscriptionPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
-
-  // Map Asaas subscription to our format
-  const mapSubscription = (subscription) => ({
-    id: subscription.id,
-    name: subscription.description || `Subscription #${subscription.id}`,
-    type: subscription.cycle,
-    status: subscription.status.toLowerCase(),
-    deviceIds: subscription.deviceIds || [],
-    userId: subscription.userId,
-  });
-
-  // For mapping back to Asaas format when saving
-  const mapToAsaasFormat = (formData) => ({
-    cycle: formData.type,
-    description: formData.name,
-    userId: formData.userId,
-    deviceIds: formData.deviceIds,
-  });
 
   const validate = () => item && item.type && item.userId && item.deviceIds && item.deviceIds.length > 0;
 
@@ -73,32 +54,22 @@ const SubscriptionPage = () => {
     });
   };
 
-  // Load subscription data when id changes
+  // Load existing subscription data if editing
   useEffect(() => {
-    const fetchSubscription = async () => {
-      if (!id) return; // Skip for new subscription
+    if (!id) return; // Skip for new subscription
 
-      setLoading(true);
-      setError(null);
-      try {
-        const subscription = await AsaasAPI.getSubscription(id);
-        setItem(mapSubscription(subscription));
-      } catch (err) {
-        console.error('Error fetching subscription:', err);
-        setError(AsaasAPI.handleError(err) || 'Failed to load subscription');
-      } finally {
-        setLoading(false);
-      }
-    };
+    setLoading(true);
+    setError(null);
 
-    fetchSubscription();
-  }, [id]);
+    // For now, we're not implementing edit functionality
+    // Just go back to the subscriptions page
+    navigate('/settings/subscriptions');
+  }, [id, navigate]);
 
   // Initialize empty subscription for new entries
   useEffect(() => {
     if (!id && !item) {
       setItem({
-        name: '',
         type: '',
         deviceIds: [],
         userId: '',
@@ -117,25 +88,35 @@ const SubscriptionPage = () => {
     setSuccess(null);
 
     try {
-      const asaasData = mapToAsaasFormat(item);
+      // Create the request body
+      const requestBody = {
+        cycle: item.type,
+        deviceIds: item.deviceIds,
+      };
 
-      if (id) {
-        // Update existing subscription
-        await AsaasAPI.updateSubscription(id, asaasData);
-        setSuccess('Subscription updated successfully');
-      } else {
-        // Create new subscription
-        const response = await AsaasAPI.createSubscription(asaasData);
+      // Send the POST request to enable billing
+      const response = await fetch(`/api/users/${item.userId}/enableBilling`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (response.ok) {
         setSuccess('Subscription created successfully');
 
-        // Navigate to the new subscription's page
+        // Navigate to the subscriptions page after a delay
         setTimeout(() => {
-          navigate(`/settings/subscription/${response.id}`);
+          navigate('/settings/subscriptions');
         }, 1500);
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Error: ${response.status} ${response.statusText}`);
       }
     } catch (err) {
-      console.error('Error saving subscription:', err);
-      setError(AsaasAPI.handleError(err) || 'Failed to save subscription');
+      console.error('Error creating subscription:', err);
+      setError(err.message || 'Failed to create subscription');
     } finally {
       setLoading(false);
     }

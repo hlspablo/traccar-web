@@ -91,21 +91,29 @@ const SelectDeviceField = ({ onChange, value, label, required, userId }) => {
           helperText={!userId ? t('selectUserFirst') : ''}
         />
       )}
-      renderOption={(props, option) => (
-        <li {...props}>
-          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Typography variant="body1">{option.name}</Typography>
-            <Typography variant="caption" color="text.secondary">{option.uniqueId}</Typography>
-          </Box>
-        </li>
-      )}
-      renderTags={(tagValue, getTagProps) => tagValue.map((option, index) => (
-        <Chip
-          label={`${option.name} (${option.uniqueId})`}
-          {...getTagProps({ index })}
-          size="small"
-        />
-      ))}
+      renderOption={(props, option) => {
+        const { key, ...otherProps } = props;
+        return (
+          <li key={key} {...otherProps}>
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+              <Typography variant="body1">{option.name}</Typography>
+              <Typography variant="caption" color="text.secondary">{option.uniqueId}</Typography>
+            </Box>
+          </li>
+        );
+      }}
+      renderTags={(tagValue, getTagProps) => tagValue.map((option, index) => {
+        const tagProps = getTagProps({ index });
+        const { key, ...otherTagProps } = tagProps;
+        return (
+          <Chip
+            key={key}
+            label={`${option.name} (${option.uniqueId})`}
+            {...otherTagProps}
+            size="small"
+          />
+        );
+      })}
       noOptionsText={userId ? t('sharedNoData') : t('selectUserFirst')}
     />
   );

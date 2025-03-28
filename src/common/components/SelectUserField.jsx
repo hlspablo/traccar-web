@@ -79,14 +79,17 @@ const SelectUserField = ({ onChange, value, label, required }) => {
           }}
         />
       )}
-      renderOption={(props, option) => (
-        <li {...props}>
-          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Typography variant="body1">{option.name}</Typography>
-            <Typography variant="caption" color="text.secondary">{option.email}</Typography>
-          </Box>
-        </li>
-      )}
+      renderOption={(props, option) => {
+        const { key, ...otherProps } = props;
+        return (
+          <li key={key} {...otherProps}>
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+              <Typography variant="body1">{option.name}</Typography>
+              <Typography variant="caption" color="text.secondary">{option.email}</Typography>
+            </Box>
+          </li>
+        );
+      }}
       noOptionsText={t('sharedNoData')}
     />
   );

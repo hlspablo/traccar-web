@@ -12,6 +12,7 @@ import { formatTime } from '../common/util/formatter';
 import { useTranslation } from '../common/components/LocalizationProvider';
 import PageLayout from '../common/components/PageLayout';
 import SettingsMenu from './components/SettingsMenu';
+import CollectionFab from './components/CollectionFab';
 import TableShimmer from '../common/components/TableShimmer';
 import SearchHeader, { filterByKeyword } from './components/SearchHeader';
 import useSettingsStyles from './common/useSettingsStyles';
@@ -221,6 +222,8 @@ const SubscriptionsPage = () => {
           {error}
         </Alert>
       </Snackbar>
+
+      <CollectionFab editPath="/settings/subscription" />
     </PageLayout>
   );
 };

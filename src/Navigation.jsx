@@ -61,6 +61,7 @@ import Loader from './common/components/Loader';
 import SubscriptionsPage from './settings/SubscriptionsPage';
 import SubscriptionPage from './settings/SubscriptionPage';
 import ViewSubscriptionPage from './settings/ViewSubscriptionPage';
+import SubscriptionsByUser from './settings/SubscriptionsByUser';
 
 const Navigation = () => {
   const navigate = useNavigate();
@@ -158,6 +159,7 @@ const Navigation = () => {
           <Route path="subscription" element={<SubscriptionPage />} />
           <Route path="users" element={<UsersPage />} />
           <Route path="user/:id/connections" element={<UserConnectionsPage />} />
+          <Route path="user/:id/subscriptions" element={<SubscriptionsByUser />} />
           <Route path="user/:id" element={<UserPage />} />
           <Route path="user" element={<UserPage />} />
         </Route>

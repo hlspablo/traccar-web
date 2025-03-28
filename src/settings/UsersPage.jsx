@@ -5,6 +5,7 @@ import {
 } from '@mui/material';
 import LoginIcon from '@mui/icons-material/Login';
 import LinkIcon from '@mui/icons-material/Link';
+import ReceiptIcon from '@mui/icons-material/Receipt';
 import { useCatch, useEffectAsync } from '../reactHelper';
 import { formatBoolean, formatTime } from '../common/util/formatter';
 import { useTranslation } from '../common/components/LocalizationProvider';
@@ -38,6 +39,13 @@ const UsersPage = () => {
       throw Error(await response.text());
     }
   });
+
+  const actionSubscriptions = {
+    key: 'subscriptions',
+    title: t('settingsSubscriptions'),
+    icon: <ReceiptIcon fontSize="small" />,
+    handler: (userId) => navigate(`/settings/user/${userId}/subscriptions`),
+  };
 
   const actionLogin = {
     key: 'login',
@@ -95,7 +103,7 @@ const UsersPage = () => {
                   editPath="/settings/user"
                   endpoint="users"
                   setTimestamp={setTimestamp}
-                  customActions={manager ? [actionLogin, actionConnections] : [actionConnections]}
+                  customActions={manager ? [actionSubscriptions, actionLogin, actionConnections] : [actionSubscriptions, actionConnections]}
                 />
               </TableCell>
             </TableRow>

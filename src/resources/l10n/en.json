@@ -651,5 +651,6 @@
     "paginationOf": "of",
     "selectUserFirst": "Please select a user first",
     "planName": "Plan Name",
-    "planValue": "Plan Value"
+    "planValue": "Plan Value",
+    "userSubscriptions": "User Subscriptions"
 }

@@ -655,5 +655,8 @@
     "userSubscriptions": "Assinaturas do Usuário",
     "viewSubscription": "Ver Assinatura",
     "userPhone": "Celular",
-    "planDescription": "Descrição do Plano"
+    "planDescription": "Descrição do Plano",
+    "devicePlan": "Plano de Assinatura",
+    "devicePlanCustom": "Plano Personalizado",
+    "devicePlanCustomDescription": "Use atributos personalizados da lista acima"
 }

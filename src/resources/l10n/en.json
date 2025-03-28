@@ -655,5 +655,8 @@
     "userSubscriptions": "User Subscriptions",
     "viewSubscription": "View Subscription",
     "userPhone": "User Phone",
-    "planDescription": "Plan Description"
+    "planDescription": "Plan Description",
+    "devicePlan": "Subscription Plan",
+    "devicePlanCustom": "Custom Plan",
+    "devicePlanCustomDescription": "Use custom attributes from the list above"
 }

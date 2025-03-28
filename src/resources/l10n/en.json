@@ -629,5 +629,12 @@
     "subscriptionDetails": "Details",
     "subscriptionAllowReports": "Allow Reports",
     "subscriptionAllowCommands": "Allow Commands",
-    "subscriptionAllowNotifications": "Allow Notifications"
+    "subscriptionAllowNotifications": "Allow Notifications",
+    "sharedRefresh": "Refresh",
+    "sharedReference": "Reference",
+    "subscriptionId": "ID",
+    "externalReference": "Reference",
+    "nextDueDate": "Next Payment",
+    "subscriptionCycle": "Cycle",
+    "clientId": "Client ID"
 }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Table, TableRow, TableCell, TableHead, TableBody, TableFooter, FormControlLabel, Switch,
+  Table, TableRow, TableCell, TableHead, TableBody,
   Snackbar, Alert, Button,
 } from '@mui/material';
 import LinkIcon from '@mui/icons-material/Link';
@@ -10,10 +10,7 @@ import { formatTime } from '../common/util/formatter';
 import { useTranslation } from '../common/components/LocalizationProvider';
 import PageLayout from '../common/components/PageLayout';
 import SettingsMenu from './components/SettingsMenu';
-import CollectionFab from './components/CollectionFab';
-import CollectionActions from './components/CollectionActions';
 import TableShimmer from '../common/components/TableShimmer';
-import { useManager } from '../common/util/permissions';
 import SearchHeader, { filterByKeyword } from './components/SearchHeader';
 import useSettingsStyles from './common/useSettingsStyles';
 import AsaasAPI from '../common/util/AsaasAPI';
@@ -23,21 +20,11 @@ const SubscriptionsPage = () => {
   const navigate = useNavigate();
   const t = useTranslation();
 
-  const manager = useManager();
-
   const [timestamp, setTimestamp] = useState(Date.now());
   const [items, setItems] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [showExpired, setShowExpired] = useState(false);
   const [error, setError] = useState(null);
-
-  const actionDetails = {
-    key: 'details',
-    title: t('sharedDetails'),
-    icon: <LinkIcon fontSize="small" />,
-    handler: (subscriptionId) => navigate(`/settings/subscription/${subscriptionId}/details`),
-  };
 
   // Convert Asaas API subscription data to our app's format
   const mapSubscriptionData = (apiData) => apiData.map((subscription) => ({
@@ -74,7 +61,9 @@ const SubscriptionsPage = () => {
       console.error('Subscription fetch error:', err);
       setError(err.message || 'Failed to fetch subscriptions');
     } finally {
-      setLoading(false);
+      setTimeout(() => {
+        setLoading(false);
+      }, 500); // Small delay to avoid UI flashing on fast responses
     }
   };
 
@@ -86,6 +75,11 @@ const SubscriptionsPage = () => {
   // Handle refresh button click
   const handleRefresh = () => {
     setTimestamp(Date.now());
+  };
+
+  // Navigate to subscription details
+  const handleViewDetails = (id) => {
+    navigate(`/settings/subscription/${id}/details`);
   };
 
   return (
@@ -103,31 +97,29 @@ const SubscriptionsPage = () => {
         </Button>
       </SearchHeader>
       {error && (
-        <Alert severity="info" sx={{ mb: 2 }}>
-          Using proxy endpoint for API calls.
-          {' '}
+        <Alert severity="warning" sx={{ mb: 2 }}>
           {error}
         </Alert>
       )}
       <Table className={classes.table}>
         <TableHead>
           <TableRow>
-            <TableCell>{t('sharedName')}</TableCell>
-            <TableCell>{t('subscriptionType')}</TableCell>
+            <TableCell>{t('subscriptionId')}</TableCell>
+            <TableCell>{t('subscriptionCycle')}</TableCell>
             <TableCell>{t('subscriptionPrice')}</TableCell>
             <TableCell>{t('subscriptionStatus')}</TableCell>
-            <TableCell>{t('userEmail')}</TableCell>
-            <TableCell>{t('sharedReference')}</TableCell>
-            <TableCell>{t('subscriptionExpirationTime')}</TableCell>
+            <TableCell>{t('clientId')}</TableCell>
+            <TableCell>{t('externalReference')}</TableCell>
+            <TableCell>{t('nextDueDate')}</TableCell>
             <TableCell className={classes.columnAction} />
           </TableRow>
         </TableHead>
         <TableBody>
-          {!loading ? items.filter((s) => showExpired || s.status !== 'expired')
+          {!loading ? items
             .filter(filterByKeyword(searchKeyword))
             .map((item) => (
               <TableRow key={item.id}>
-                <TableCell>{item.name}</TableCell>
+                <TableCell>{item.id}</TableCell>
                 <TableCell>{item.type}</TableCell>
                 <TableCell>
                   R$
@@ -138,36 +130,18 @@ const SubscriptionsPage = () => {
                 <TableCell>{item.externalReference || '-'}</TableCell>
                 <TableCell>{formatTime(item.expirationTime, 'date')}</TableCell>
                 <TableCell className={classes.columnAction} padding="none">
-                  <CollectionActions
-                    itemId={item.id}
-                    editPath="/settings/subscription"
-                    endpoint="subscriptions"
-                    setTimestamp={setTimestamp}
-                    customActions={manager ? [actionDetails] : []}
-                  />
+                  <Button
+                    onClick={() => handleViewDetails(item.id)}
+                    size="small"
+                    startIcon={<LinkIcon fontSize="small" />}
+                  >
+                    {t('sharedDetails')}
+                  </Button>
                 </TableCell>
               </TableRow>
             )) : (<TableShimmer columns={8} endAction />)}
         </TableBody>
-        <TableFooter>
-          <TableRow>
-            <TableCell colSpan={8} align="right">
-              <FormControlLabel
-                control={(
-                  <Switch
-                    value={showExpired}
-                    onChange={(e) => setShowExpired(e.target.checked)}
-                    size="small"
-                  />
-                )}
-                label={t('subscriptionShowExpired')}
-                labelPlacement="start"
-              />
-            </TableCell>
-          </TableRow>
-        </TableFooter>
       </Table>
-      <CollectionFab editPath="/settings/subscription" />
 
       {/* Error notification */}
       <Snackbar

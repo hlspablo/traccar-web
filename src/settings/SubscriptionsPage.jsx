@@ -179,6 +179,7 @@ const SubscriptionsPage = () => {
           alignItems: 'center',
           mt: 2,
           mb: 2,
+          px: 3,
         }}
       >
         <Typography variant="body2">

@@ -99,7 +99,7 @@ const SubscriptionsPage = () => {
 
   // Navigate to subscription details
   const handleViewDetails = (id) => {
-    navigate(`/settings/subscription/${id}/details`);
+    navigate(`/settings/subscription/${id}/view`);
   };
 
   // Handle pagination

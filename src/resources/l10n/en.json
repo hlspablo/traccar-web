@@ -628,16 +628,16 @@
     "subscriptionExpirationTime": "Expiration",
     "subscriptionCreationTime": "Creation",
     "subscriptionShowExpired": "Show Expired",
-    "subscriptionDetails": "Details",
+    "subscriptionDetails": "Subscription Details",
     "subscriptionAllowReports": "Allow Reports",
     "subscriptionAllowCommands": "Allow Commands",
     "subscriptionAllowNotifications": "Allow Notifications",
     "sharedRefresh": "Refresh",
     "sharedReference": "Reference",
-    "subscriptionId": "ID",
+    "subscriptionId": "Subscription ID",
     "externalReference": "Reference",
     "nextDueDate": "Next Payment",
-    "subscriptionCycle": "Cycle",
+    "subscriptionCycle": "Billing Cycle",
     "subscriptionCycleWeekly": "Weekly",
     "subscriptionCycleBiweekly": "Biweekly",
     "subscriptionCycleMonthly": "Monthly",
@@ -649,5 +649,7 @@
     "sharedNext": "Next",
     "sharedPrevious": "Previous",
     "paginationOf": "of",
-    "selectUserFirst": "Please select a user first"
+    "selectUserFirst": "Please select a user first",
+    "planName": "Plan Name",
+    "planValue": "Plan Value"
 }

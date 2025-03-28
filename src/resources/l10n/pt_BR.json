@@ -649,5 +649,7 @@
     "sharedNext": "Próxima",
     "sharedPrevious": "Anterior",
     "paginationOf": "de",
-    "selectUserFirst": "Por favor, selecione um usuário primeiro"
+    "selectUserFirst": "Por favor, selecione um usuário primeiro",
+    "planName": "Nome do Plano",
+    "planValue": "Valor do Plano"
 }

@@ -60,6 +60,7 @@ import EmulatorPage from './other/EmulatorPage';
 import Loader from './common/components/Loader';
 import SubscriptionsPage from './settings/SubscriptionsPage';
 import SubscriptionPage from './settings/SubscriptionPage';
+import ViewSubscriptionPage from './settings/ViewSubscriptionPage';
 
 const Navigation = () => {
   const navigate = useNavigate();
@@ -152,6 +153,7 @@ const Navigation = () => {
           <Route path="server" element={<ServerPage />} />
           <Route path="subscriptions" element={<SubscriptionsPage />} />
           <Route path="subscription/:id/details" element={<SubscriptionPage />} />
+          <Route path="subscription/:id/view" element={<ViewSubscriptionPage />} />
           <Route path="subscription/:id" element={<SubscriptionPage />} />
           <Route path="subscription" element={<SubscriptionPage />} />
           <Route path="users" element={<UsersPage />} />

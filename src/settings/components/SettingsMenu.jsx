@@ -15,6 +15,7 @@ import PublishIcon from '@mui/icons-material/Publish';
 import SmartphoneIcon from '@mui/icons-material/Smartphone';
 import HelpIcon from '@mui/icons-material/Help';
 import CampaignIcon from '@mui/icons-material/Campaign';
+import SubscriptionsIcon from '@mui/icons-material/Subscriptions';
 import { Link, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useTranslation } from '../../common/components/LocalizationProvider';
@@ -154,6 +155,12 @@ const SettingsMenu = () => {
                   link="/settings/server"
                   icon={<StorageIcon />}
                   selected={location.pathname === '/settings/server'}
+                />
+                <MenuItem
+                  title={t('settingsSubscriptions')}
+                  link="/settings/subscriptions"
+                  icon={<SubscriptionsIcon />}
+                  selected={location.pathname.startsWith('/settings/subscription')}
                 />
               </>
             )}

@@ -58,6 +58,8 @@ import SharePage from './settings/SharePage';
 import AnnouncementPage from './settings/AnnouncementPage';
 import EmulatorPage from './other/EmulatorPage';
 import Loader from './common/components/Loader';
+import SubscriptionsPage from './settings/SubscriptionsPage';
+import SubscriptionPage from './settings/SubscriptionPage';
 
 const Navigation = () => {
   const navigate = useNavigate();
@@ -148,6 +150,10 @@ const Navigation = () => {
           <Route path="notification" element={<NotificationPage />} />
           <Route path="preferences" element={<PreferencesPage />} />
           <Route path="server" element={<ServerPage />} />
+          <Route path="subscriptions" element={<SubscriptionsPage />} />
+          <Route path="subscription/:id/details" element={<SubscriptionPage />} />
+          <Route path="subscription/:id" element={<SubscriptionPage />} />
+          <Route path="subscription" element={<SubscriptionPage />} />
           <Route path="users" element={<UsersPage />} />
           <Route path="user/:id/connections" element={<UserConnectionsPage />} />
           <Route path="user/:id" element={<UserPage />} />

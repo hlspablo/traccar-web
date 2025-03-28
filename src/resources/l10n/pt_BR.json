@@ -643,5 +643,8 @@
     "subscriptionCycleQuarterly": "Trimestral",
     "subscriptionCycleSemiannually": "Semestral",
     "subscriptionCycleYearly": "Anual",
-    "clientId": "ID Cliente"
+    "clientId": "ID Cliente",
+    "sharedNext": "Próxima",
+    "sharedPrevious": "Anterior",
+    "paginationOf": "de"
 }

@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Table, TableRow, TableCell, TableHead, TableBody,
-  Snackbar, Alert, Button,
+  Snackbar, Alert, Button, Box, Typography,
 } from '@mui/material';
 import LinkIcon from '@mui/icons-material/Link';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 import { formatTime } from '../common/util/formatter';
 import { useTranslation } from '../common/components/LocalizationProvider';
 import PageLayout from '../common/components/PageLayout';
@@ -26,6 +28,12 @@ const SubscriptionsPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Pagination state
+  const [offset, setOffset] = useState(0);
+  const [limit] = useState(10);
+  const [hasMore, setHasMore] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
+
   // Convert Asaas API subscription data to our app's format
   const mapSubscriptionData = (apiData) => apiData.map((subscription) => ({
     id: subscription.id,
@@ -40,19 +48,30 @@ const SubscriptionsPage = () => {
     expirationTime: subscription.nextDueDate,
   }));
 
-  // Fetch subscriptions from Asaas API
+  // Fetch subscriptions from Asaas API with pagination
   const fetchData = async () => {
     setLoading(true);
     setError(null);
     try {
-      console.log('Fetching subscriptions...');
-      const response = await AsaasAPI.getSubscriptions();
+      console.log(`Fetching subscriptions with offset=${offset}, limit=${limit}...`);
+      const response = await AsaasAPI.getSubscriptions(offset, limit);
       console.log('API response:', response);
 
       if (response && response.data) {
         const mappedData = mapSubscriptionData(response.data);
         setItems(mappedData);
+
+        // Update pagination info
+        setHasMore(response.hasMore || false);
+        setTotalCount(response.totalCount || 0);
+
         console.log('Subscriptions loaded:', mappedData.length);
+        console.log('Pagination:', {
+          hasMore: response.hasMore,
+          totalCount: response.totalCount,
+          offset,
+          limit,
+        });
       } else {
         console.error('Invalid API response:', response);
         setError('Invalid response format from API');
@@ -67,10 +86,10 @@ const SubscriptionsPage = () => {
     }
   };
 
-  // Load data when component mounts or when timestamp changes
+  // Load data when component mounts or when timestamp or pagination changes
   useEffect(() => {
     fetchData();
-  }, [timestamp]);
+  }, [timestamp, offset, limit]);
 
   // Handle refresh button click
   const handleRefresh = () => {
@@ -80,6 +99,15 @@ const SubscriptionsPage = () => {
   // Navigate to subscription details
   const handleViewDetails = (id) => {
     navigate(`/settings/subscription/${id}/details`);
+  };
+
+  // Handle pagination
+  const handleNextPage = () => {
+    setOffset((prevOffset) => prevOffset + limit);
+  };
+
+  const handlePrevPage = () => {
+    setOffset((prevOffset) => Math.max(0, prevOffset - limit));
   };
 
   return (
@@ -142,6 +170,44 @@ const SubscriptionsPage = () => {
             )) : (<TableShimmer columns={8} endAction />)}
         </TableBody>
       </Table>
+
+      {/* Pagination controls */}
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mt: 2,
+          mb: 2,
+        }}
+      >
+        <Typography variant="body2">
+          {totalCount > 0
+            ? `${Math.min(offset + 1, totalCount)}-${Math.min(offset + limit, totalCount)} ${t('paginationOf')} ${totalCount}`
+            : `0 ${t('paginationOf')} 0`}
+        </Typography>
+        <Box>
+          <Button
+            variant="outlined"
+            color="primary"
+            startIcon={<NavigateBeforeIcon />}
+            disabled={offset === 0 || loading}
+            onClick={handlePrevPage}
+            sx={{ mr: 1 }}
+          >
+            {t('sharedPrevious')}
+          </Button>
+          <Button
+            variant="outlined"
+            color="primary"
+            endIcon={<NavigateNextIcon />}
+            disabled={!hasMore || loading}
+            onClick={handleNextPage}
+          >
+            {t('sharedNext')}
+          </Button>
+        </Box>
+      </Box>
 
       {/* Error notification */}
       <Snackbar

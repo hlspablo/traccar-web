@@ -55,7 +55,7 @@ const fetchWithProxy = async (endpoint, options = {}) => {
 };
 
 class AsaasAPI {
-  static async getSubscriptions(offset = 0, limit = 50) {
+  static async getSubscriptions(offset = 0, limit = 10) {
     try {
       const response = await fetchWithProxy(`/v3/subscriptions?offset=${offset}&limit=${limit}`, {
         method: 'GET',
@@ -64,7 +64,14 @@ class AsaasAPI {
         },
       });
 
-      return handleResponse(response);
+      const data = await handleResponse(response);
+      return {
+        data: data.data || [],
+        hasMore: data.hasMore || false,
+        totalCount: data.totalCount || 0,
+        limit: data.limit || limit,
+        offset: data.offset || offset,
+      };
     } catch (error) {
       console.error('Error fetching subscriptions:', error);
       throw error;

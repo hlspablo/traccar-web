@@ -21,6 +21,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import { useTranslation } from '../common/components/LocalizationProvider';
 import PageLayout from '../common/components/PageLayout';
 import SettingsMenu from './components/SettingsMenu';
+import SelectUserField from '../common/components/SelectUserField';
 import useSettingsStyles from './common/useSettingsStyles';
 import AsaasAPI from '../common/util/AsaasAPI';
 
@@ -44,6 +45,7 @@ const SubscriptionPage = () => {
     status: subscription.status.toLowerCase(),
     customer: subscription.customer,
     externalReference: subscription.externalReference,
+    userId: subscription.userId,
   });
 
   // For mapping back to Asaas format when saving
@@ -53,9 +55,18 @@ const SubscriptionPage = () => {
     cycle: formData.type,
     description: formData.name,
     externalReference: formData.externalReference,
+    userId: formData.userId,
   });
 
   const validate = () => item && item.type && item.price && item.customer;
+
+  // Handle user selection change
+  const handleUserChange = (userId) => {
+    setItem({
+      ...item,
+      userId,
+    });
+  };
 
   // Load subscription data when id changes
   useEffect(() => {
@@ -77,6 +88,20 @@ const SubscriptionPage = () => {
 
     fetchSubscription();
   }, [id]);
+
+  // Initialize empty subscription for new entries
+  useEffect(() => {
+    if (!id && !item) {
+      setItem({
+        name: '',
+        type: '',
+        price: 0,
+        customer: '',
+        externalReference: '',
+        userId: '',
+      });
+    }
+  }, [id, item]);
 
   const handleSave = async () => {
     if (!validate()) {
@@ -135,10 +160,11 @@ const SubscriptionPage = () => {
               </Typography>
             </AccordionSummary>
             <AccordionDetails className={classes.details}>
-              <TextField
-                value={item?.name || ''}
-                onChange={(e) => setItem({ ...item, name: e.target.value })}
-                label={t('sharedName')}
+              <SelectUserField
+                value={item?.userId || ''}
+                onChange={handleUserChange}
+                label={t('sharedUser')}
+                required
               />
               <TextField
                 value={item?.customer || ''}

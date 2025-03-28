@@ -94,11 +94,12 @@ const SubscriptionPage = () => {
         deviceIds: item.deviceIds,
       };
 
-      // Send the POST request to enable billing
+      // Send the POST request to enable billing using the standard API pattern
       const response = await fetch(`/api/users/${item.userId}/enableBilling`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Accept: 'application/json',
         },
         body: JSON.stringify(requestBody),
       });
@@ -111,8 +112,29 @@ const SubscriptionPage = () => {
           navigate('/settings/subscriptions');
         }, 1500);
       } else {
-        const errorData = await response.json();
-        throw new Error(errorData.message || `Error: ${response.status} ${response.statusText}`);
+        // Handle error responses
+        let errorMessage = `Error: ${response.status} ${response.statusText}`;
+
+        try {
+          // Try to get the response text
+          const responseText = await response.text();
+
+          if (responseText) {
+            try {
+              const errorData = JSON.parse(responseText);
+              if (errorData && errorData.message) {
+                errorMessage = errorData.message;
+              }
+            } catch (parseError) {
+              // If not valid JSON, use the text as is
+              errorMessage = responseText;
+            }
+          }
+        } catch (error) {
+          console.error('Error reading response:', error);
+        }
+
+        throw new Error(errorMessage);
       }
     } catch (err) {
       console.error('Error creating subscription:', err);
@@ -176,7 +198,7 @@ const SubscriptionPage = () => {
             </AccordionDetails>
           </Accordion>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '16px 0' }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '16px 0', padding: '0 30px' }}>
             <Button
               variant="contained"
               color="primary"

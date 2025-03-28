@@ -9,7 +9,6 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  TextField,
   Button,
   Snackbar,
   Alert,
@@ -42,24 +41,20 @@ const SubscriptionPage = () => {
     id: subscription.id,
     name: subscription.description || `Subscription #${subscription.id}`,
     type: subscription.cycle,
-    price: subscription.value,
     status: subscription.status.toLowerCase(),
     deviceIds: subscription.deviceIds || [],
-    externalReference: subscription.externalReference,
     userId: subscription.userId,
   });
 
   // For mapping back to Asaas format when saving
   const mapToAsaasFormat = (formData) => ({
-    value: formData.price,
     cycle: formData.type,
     description: formData.name,
-    externalReference: formData.externalReference,
     userId: formData.userId,
     deviceIds: formData.deviceIds,
   });
 
-  const validate = () => item && item.type && item.price && item.userId && item.deviceIds && item.deviceIds.length > 0;
+  const validate = () => item && item.type && item.userId && item.deviceIds && item.deviceIds.length > 0;
 
   // Handle user selection change
   const handleUserChange = (userId) => {
@@ -105,9 +100,7 @@ const SubscriptionPage = () => {
       setItem({
         name: '',
         type: '',
-        price: 0,
         deviceIds: [],
-        externalReference: '',
         userId: '',
       });
     }
@@ -199,18 +192,6 @@ const SubscriptionPage = () => {
                   <MenuItem value="YEARLY">{t('subscriptionCycleYearly')}</MenuItem>
                 </Select>
               </FormControl>
-              <TextField
-                type="number"
-                value={item?.price || 0}
-                onChange={(e) => setItem({ ...item, price: Number(e.target.value) })}
-                label={t('subscriptionPrice')}
-                required
-              />
-              <TextField
-                value={item?.externalReference || ''}
-                onChange={(e) => setItem({ ...item, externalReference: e.target.value })}
-                label={t('externalReference')}
-              />
             </AccordionDetails>
           </Accordion>
 

@@ -22,6 +22,7 @@ import { useTranslation } from '../common/components/LocalizationProvider';
 import PageLayout from '../common/components/PageLayout';
 import SettingsMenu from './components/SettingsMenu';
 import SelectUserField from '../common/components/SelectUserField';
+import SelectDeviceField from '../common/components/SelectDeviceField';
 import useSettingsStyles from './common/useSettingsStyles';
 import AsaasAPI from '../common/util/AsaasAPI';
 
@@ -43,28 +44,37 @@ const SubscriptionPage = () => {
     type: subscription.cycle,
     price: subscription.value,
     status: subscription.status.toLowerCase(),
-    customer: subscription.customer,
+    deviceIds: subscription.deviceIds || [],
     externalReference: subscription.externalReference,
     userId: subscription.userId,
   });
 
   // For mapping back to Asaas format when saving
   const mapToAsaasFormat = (formData) => ({
-    customer: formData.customer,
     value: formData.price,
     cycle: formData.type,
     description: formData.name,
     externalReference: formData.externalReference,
     userId: formData.userId,
+    deviceIds: formData.deviceIds,
   });
 
-  const validate = () => item && item.type && item.price && item.customer;
+  const validate = () => item && item.type && item.price && item.userId && item.deviceIds && item.deviceIds.length > 0;
 
   // Handle user selection change
   const handleUserChange = (userId) => {
     setItem({
       ...item,
       userId,
+      deviceIds: [], // Reset deviceIds when user changes
+    });
+  };
+
+  // Handle device selection change
+  const handleDeviceChange = (deviceIds) => {
+    setItem({
+      ...item,
+      deviceIds,
     });
   };
 
@@ -96,7 +106,7 @@ const SubscriptionPage = () => {
         name: '',
         type: '',
         price: 0,
-        customer: '',
+        deviceIds: [],
         externalReference: '',
         userId: '',
       });
@@ -166,10 +176,11 @@ const SubscriptionPage = () => {
                 label={t('sharedUser')}
                 required
               />
-              <TextField
-                value={item?.customer || ''}
-                onChange={(e) => setItem({ ...item, customer: e.target.value })}
-                label={t('clientId')}
+              <SelectDeviceField
+                value={item?.deviceIds || []}
+                onChange={handleDeviceChange}
+                label={t('deviceTitle')}
+                userId={item?.userId}
                 required
               />
               <FormControl required>

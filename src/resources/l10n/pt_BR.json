@@ -648,5 +648,6 @@
     "clientId": "ID Cliente",
     "sharedNext": "Próxima",
     "sharedPrevious": "Anterior",
-    "paginationOf": "de"
+    "paginationOf": "de",
+    "selectUserFirst": "Por favor, selecione um usuário primeiro"
 }

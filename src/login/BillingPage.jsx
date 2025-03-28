@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {
   Typography,
@@ -18,7 +17,6 @@ import {
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import { useAuth } from '../common/util/AuthContext';
-import { devicesActions } from '../store';
 
 import Logo from '../resources/images/coragem-logo.png';
 
@@ -142,15 +140,56 @@ const useStyles = makeStyles((theme) => ({
 const BillingPage = () => {
   const classes = useStyles();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [devicesLoaded, setDevicesLoaded] = useState(false);
+  const [subscriptions, setSubscriptions] = useState([]);
+  const [subscriptionsLoaded, setSubscriptionsLoaded] = useState(false);
 
-  // Use the AuthContext instead of direct Redux access for authentication
+  // Use the AuthContext for authentication
   const { authChecked, isAuthenticated, user } = useAuth();
 
-  const devices = useSelector((state) => state.devices.items);
+  // Helper function for making API calls to Asaas via proxy
+  const fetchWithProxy = async (endpoint, options = {}) => {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+      const response = await fetch(`/asaas-proxy${endpoint}`, {
+        ...options,
+        headers: {
+          ...options.headers,
+          access_token: '$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OmFjZTU1MTFjLWU1OTItNGZiYy05MGYwLTlhNGM2ZGU2ZDNhMDo6JGFhY2hfZTQyODE5MjEtNjljZi00YTAwLWIxNjgtZGQxNzk1ZTU1Nzky',
+        },
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+      return response;
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        throw new Error('Timeout da requisição - A API demorou muito para responder');
+      }
+      throw error;
+    }
+  };
+
+  const handleResponse = async (response) => {
+    if (!response.ok) {
+      let errorData;
+      try {
+        errorData = await response.json();
+      } catch (e) {
+        errorData = { message: 'Erro desconhecido' };
+      }
+      throw new Error(errorData.message || `Falha na requisição com status ${response.status}`);
+    }
+
+    try {
+      return await response.json();
+    } catch (e) {
+      throw new Error('Falha ao processar resposta da API');
+    }
+  };
 
   // First effect for authentication check
   useEffect(() => {
@@ -171,37 +210,64 @@ const BillingPage = () => {
     };
   }, [authChecked, isAuthenticated, navigate]);
 
-  // Second effect to fetch devices if not already loaded
+  // Second effect to fetch user's subscriptions
   useEffect(() => {
-    const fetchDevices = async () => {
+    const fetchUserSubscriptions = async () => {
       try {
-        if (isAuthenticated && (!devices || Object.keys(devices).length === 0)) {
-          const response = await fetch('/api/devices');
-          if (response.ok) {
-            const fetchedDevices = await response.json();
-            dispatch(devicesActions.refresh(fetchedDevices));
-          }
+        if (!isAuthenticated || !user) {
+          setSubscriptionsLoaded(true);
+          return;
         }
-        setDevicesLoaded(true);
+
+        // Get subscription IDs from user attributes
+        const subscriptionIds = [];
+        if (user.attributes) {
+          Object.keys(user.attributes).forEach((key) => {
+            if (key.startsWith('subscription_')) {
+              const subscriptionId = key.substring('subscription_'.length);
+              subscriptionIds.push(subscriptionId);
+            }
+          });
+        }
+
+        if (subscriptionIds.length === 0) {
+          setSubscriptions([]);
+          setSubscriptionsLoaded(true);
+          return;
+        }
+
+        // Fetch all subscriptions in parallel
+        const subscriptionPromises = subscriptionIds.map((subId) => fetchWithProxy(`/v3/subscriptions/${subId}`)
+          .then(handleResponse)
+          .catch((error) => {
+            console.error(`Erro ao buscar assinatura ${subId}:`, error);
+            return null; // Return null for failed fetches
+          }));
+
+        const results = await Promise.all(subscriptionPromises);
+        const validSubscriptions = results.filter((sub) => sub !== null);
+        setSubscriptions(validSubscriptions);
+        setSubscriptionsLoaded(true);
       } catch (err) {
-        setError('Erro ao carregar dispositivos. Por favor, tente novamente mais tarde.');
-        setDevicesLoaded(true);
+        console.error('Erro ao buscar assinaturas do usuário:', err);
+        setError(err.message || 'Falha ao carregar assinaturas do usuário');
+        setSubscriptionsLoaded(true);
       }
     };
 
-    if (isAuthenticated && !devicesLoaded) {
-      fetchDevices();
+    if (isAuthenticated && !subscriptionsLoaded) {
+      fetchUserSubscriptions();
     }
-  }, [isAuthenticated, devices, dispatch, devicesLoaded]);
+  }, [isAuthenticated, user, subscriptionsLoaded]);
 
-  // Show loading while authentication is being checked or devices are loading
-  if (!authChecked || loading || !devicesLoaded) {
+  // Show loading while authentication is being checked or subscriptions are loading
+  if (!authChecked || loading || !subscriptionsLoaded) {
     let loadingMessage = 'Carregando informações de faturamento...';
 
     if (!authChecked) {
       loadingMessage = 'Verificando autenticação...';
-    } else if (!devicesLoaded) {
-      loadingMessage = 'Carregando dispositivos...';
+    } else if (!subscriptionsLoaded) {
+      loadingMessage = 'Carregando assinaturas...';
     }
 
     return (
@@ -230,7 +296,7 @@ const BillingPage = () => {
     return null;
   }
 
-  if (!devices || Object.keys(devices).length === 0) {
+  if (!subscriptions || subscriptions.length === 0) {
     return (
       <Box
         sx={{
@@ -256,21 +322,30 @@ const BillingPage = () => {
           </Typography>
 
           <Alert severity="info" sx={{ mt: 2, mb: 2 }}>
-            Não há dispositivos registrados para este usuário.
+            Não há assinaturas registradas para este usuário.
           </Alert>
         </Paper>
       </Box>
     );
   }
 
-  const devicesArray = Object.values(devices);
+  // Format date for display
+  const formatDate = (dateString) => {
+    try {
+      if (!dateString) return '-';
+      const date = new Date(dateString);
+      return date.toLocaleDateString('pt-BR');
+    } catch (err) {
+      return '-';
+    }
+  };
 
   // Calculate total with error handling
   let total = 0;
   try {
-    devicesArray.forEach((device) => {
-      if (device.attributes && device.attributes.valor) {
-        const valor = parseFloat(device.attributes.valor) || 0;
+    subscriptions.forEach((subscription) => {
+      if (subscription.value) {
+        const valor = parseFloat(subscription.value) || 0;
         if (!Number.isNaN(valor)) {
           total += valor;
         }
@@ -314,25 +389,32 @@ const BillingPage = () => {
           <Table className={classes.table} aria-label="tabela de faturamento">
             <TableHead className={classes.tableHead}>
               <TableRow>
-                <TableCell className={classes.tableHeadCell}>Dispositivo</TableCell>
-                <TableCell className={classes.tableHeadCell}>Plano</TableCell>
+                <TableCell className={classes.tableHeadCell}>Descrição</TableCell>
+                <TableCell className={classes.tableHeadCell}>Ciclo</TableCell>
+                <TableCell className={classes.tableHeadCell}>Próximo Vencimento</TableCell>
+                <TableCell className={classes.tableHeadCell}>Status</TableCell>
                 <TableCell className={classes.tableHeadCell} align="right">Valor (R$)</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {devicesArray.map((device) => {
+              {subscriptions.map((subscription) => {
                 try {
-                  const plano = device.attributes?.plano || 'Falha ao carregar plano';
-                  const valor = device.attributes?.valor || 0;
+                  const description = subscription.description || 'Sem descrição';
+                  const value = subscription.value || 0;
+                  const cycle = subscription.cycle ? subscription.cycle.charAt(0).toUpperCase() + subscription.cycle.slice(1).toLowerCase() : '-';
+                  const nextDueDate = formatDate(subscription.nextDueDate);
+                  const status = subscription.status ? subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1).toLowerCase() : '-';
 
                   return (
-                    <TableRow key={device.id} className={classes.tableRow}>
+                    <TableRow key={subscription.id} className={classes.tableRow}>
                       <TableCell component="th" scope="row" className={classes.tableCell}>
-                        {device.name}
+                        {description}
                       </TableCell>
-                      <TableCell className={classes.tableCell}>{plano}</TableCell>
+                      <TableCell className={classes.tableCell}>{cycle}</TableCell>
+                      <TableCell className={classes.tableCell}>{nextDueDate}</TableCell>
+                      <TableCell className={classes.tableCell}>{status}</TableCell>
                       <TableCell align="right" className={classes.tableCellAmount}>
-                        {parseFloat(valor).toLocaleString('pt-BR', {
+                        {parseFloat(value).toLocaleString('pt-BR', {
                           style: 'currency',
                           currency: 'BRL',
                         })}
@@ -341,11 +423,13 @@ const BillingPage = () => {
                   );
                 } catch (err) {
                   return (
-                    <TableRow key={device.id} className={classes.tableRow}>
+                    <TableRow key={subscription.id || 'error'} className={classes.tableRow}>
                       <TableCell component="th" scope="row" className={classes.tableCell}>
-                        {device.name}
+                        Erro ao carregar assinatura
                       </TableCell>
-                      <TableCell className={classes.tableCell}>Erro</TableCell>
+                      <TableCell className={classes.tableCell}>-</TableCell>
+                      <TableCell className={classes.tableCell}>-</TableCell>
+                      <TableCell className={classes.tableCell}>-</TableCell>
                       <TableCell align="right" className={classes.tableCellAmount}>-</TableCell>
                     </TableRow>
                   );

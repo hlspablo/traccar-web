@@ -60,6 +60,7 @@
   ],
   "rewrites": [
     {"source": "/api/:path*", "destination": "http://coragemserver.top/api/:path*"},
+    {"source": "/asaas-proxy/:path*", "destination": "https://api-sandbox.asaas.com/:path*"},
     {"source": "/(.*)", "destination": "/index.html"}
   ]
 }

@@ -460,7 +460,6 @@ const BillingPage = () => {
         alignItems: 'center',
         p: 4,
         bgcolor: '#ffffff',
-        minHeight: '100vh',
         width: '100%',
       }}
     >

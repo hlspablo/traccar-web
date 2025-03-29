@@ -389,7 +389,7 @@ const BillingPage = () => {
           <Table className={classes.table} aria-label="tabela de faturamento">
             <TableHead className={classes.tableHead}>
               <TableRow>
-                <TableCell className={classes.tableHeadCell}>Descrição</TableCell>
+                <TableCell className={classes.tableHeadCell}>ID da Assinatura</TableCell>
                 <TableCell className={classes.tableHeadCell}>Ciclo</TableCell>
                 <TableCell className={classes.tableHeadCell}>Próximo Vencimento</TableCell>
                 <TableCell className={classes.tableHeadCell}>Status</TableCell>
@@ -399,7 +399,6 @@ const BillingPage = () => {
             <TableBody>
               {subscriptions.map((subscription) => {
                 try {
-                  const description = subscription.description || 'Sem descrição';
                   const value = subscription.value || 0;
                   const cycle = subscription.cycle ? subscription.cycle.charAt(0).toUpperCase() + subscription.cycle.slice(1).toLowerCase() : '-';
                   const nextDueDate = formatDate(subscription.nextDueDate);
@@ -407,9 +406,7 @@ const BillingPage = () => {
 
                   return (
                     <TableRow key={subscription.id} className={classes.tableRow}>
-                      <TableCell component="th" scope="row" className={classes.tableCell}>
-                        {description}
-                      </TableCell>
+                      <TableCell className={classes.tableCell}>{subscription.id || '-'}</TableCell>
                       <TableCell className={classes.tableCell}>{cycle}</TableCell>
                       <TableCell className={classes.tableCell}>{nextDueDate}</TableCell>
                       <TableCell className={classes.tableCell}>{status}</TableCell>
@@ -424,9 +421,7 @@ const BillingPage = () => {
                 } catch (err) {
                   return (
                     <TableRow key={subscription.id || 'error'} className={classes.tableRow}>
-                      <TableCell component="th" scope="row" className={classes.tableCell}>
-                        Erro ao carregar assinatura
-                      </TableCell>
+                      <TableCell className={classes.tableCell}>-</TableCell>
                       <TableCell className={classes.tableCell}>-</TableCell>
                       <TableCell className={classes.tableCell}>-</TableCell>
                       <TableCell className={classes.tableCell}>-</TableCell>

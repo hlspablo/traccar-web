@@ -14,8 +14,12 @@ import {
   CardContent,
   Alert,
   CircularProgress,
+  Collapse,
+  IconButton,
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { useAuth } from '../common/util/AuthContext';
 
 import Logo from '../resources/images/coragem-logo.png';
@@ -144,9 +148,20 @@ const BillingPage = () => {
   const [error, setError] = useState(null);
   const [subscriptions, setSubscriptions] = useState([]);
   const [subscriptionsLoaded, setSubscriptionsLoaded] = useState(false);
+  const [devices, setDevices] = useState([]);
+  const [devicesLoaded, setDevicesLoaded] = useState(false);
+  const [openRows, setOpenRows] = useState({});
 
   // Use the AuthContext for authentication
   const { authChecked, isAuthenticated, user } = useAuth();
+
+  // Toggle row expansion
+  const handleToggleRow = (subscriptionId) => {
+    setOpenRows((prev) => ({
+      ...prev,
+      [subscriptionId]: !prev[subscriptionId],
+    }));
+  };
 
   // Helper function for making API calls to Asaas via proxy
   const fetchWithProxy = async (endpoint, options = {}) => {
@@ -260,14 +275,44 @@ const BillingPage = () => {
     }
   }, [isAuthenticated, user, subscriptionsLoaded]);
 
-  // Show loading while authentication is being checked or subscriptions are loading
-  if (!authChecked || loading || !subscriptionsLoaded) {
+  // Third effect to fetch devices
+  useEffect(() => {
+    const fetchDevices = async () => {
+      try {
+        if (!isAuthenticated) {
+          setDevicesLoaded(true);
+          return;
+        }
+
+        const response = await fetch('/api/devices');
+        if (response.ok) {
+          const allDevices = await response.json();
+          setDevices(allDevices);
+        } else {
+          console.error('Erro ao buscar dispositivos:', response.status);
+        }
+        setDevicesLoaded(true);
+      } catch (err) {
+        console.error('Erro ao buscar dispositivos:', err);
+        setDevicesLoaded(true);
+      }
+    };
+
+    if (isAuthenticated && !devicesLoaded) {
+      fetchDevices();
+    }
+  }, [isAuthenticated, devicesLoaded]);
+
+  // Show loading while authentication is being checked or data is loading
+  if (!authChecked || loading || !subscriptionsLoaded || !devicesLoaded) {
     let loadingMessage = 'Carregando informações de faturamento...';
 
     if (!authChecked) {
       loadingMessage = 'Verificando autenticação...';
     } else if (!subscriptionsLoaded) {
       loadingMessage = 'Carregando assinaturas...';
+    } else if (!devicesLoaded) {
+      loadingMessage = 'Carregando dispositivos...';
     }
 
     return (
@@ -340,6 +385,18 @@ const BillingPage = () => {
     }
   };
 
+  // Format currency for display
+  const formatCurrency = (value) => {
+    try {
+      return parseFloat(value).toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+      });
+    } catch (err) {
+      return '-';
+    }
+  };
+
   // Calculate total with error handling
   let total = 0;
   try {
@@ -354,6 +411,16 @@ const BillingPage = () => {
   } catch (err) {
     setError('Erro ao calcular o total. Por favor, tente novamente mais tarde.');
   }
+
+  // Get devices for a subscription
+  const getDevicesForSubscription = (subscriptionId) => {
+    try {
+      return devices.filter((device) => device.attributes && device.attributes.subscriptionId === subscriptionId);
+    } catch (err) {
+      console.error('Erro ao filtrar dispositivos para assinatura:', err);
+      return [];
+    }
+  };
 
   return (
     <Box
@@ -389,6 +456,7 @@ const BillingPage = () => {
           <Table className={classes.table} aria-label="tabela de faturamento">
             <TableHead className={classes.tableHead}>
               <TableRow>
+                <TableCell className={classes.tableHeadCell} style={{ width: '60px' }} />
                 <TableCell className={classes.tableHeadCell}>ID da Assinatura</TableCell>
                 <TableCell className={classes.tableHeadCell}>Ciclo</TableCell>
                 <TableCell className={classes.tableHeadCell}>Próximo Vencimento</TableCell>
@@ -403,24 +471,77 @@ const BillingPage = () => {
                   const cycle = subscription.cycle ? subscription.cycle.charAt(0).toUpperCase() + subscription.cycle.slice(1).toLowerCase() : '-';
                   const nextDueDate = formatDate(subscription.nextDueDate);
                   const status = subscription.status ? subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1).toLowerCase() : '-';
+                  const subscriptionDevices = getDevicesForSubscription(subscription.id);
+                  const hasDevices = subscriptionDevices.length > 0;
 
                   return (
-                    <TableRow key={subscription.id} className={classes.tableRow}>
-                      <TableCell className={classes.tableCell}>{subscription.id || '-'}</TableCell>
-                      <TableCell className={classes.tableCell}>{cycle}</TableCell>
-                      <TableCell className={classes.tableCell}>{nextDueDate}</TableCell>
-                      <TableCell className={classes.tableCell}>{status}</TableCell>
-                      <TableCell align="right" className={classes.tableCellAmount}>
-                        {parseFloat(value).toLocaleString('pt-BR', {
-                          style: 'currency',
-                          currency: 'BRL',
-                        })}
-                      </TableCell>
-                    </TableRow>
+                    <React.Fragment key={subscription.id}>
+                      <TableRow className={classes.tableRow}>
+                        <TableCell className={classes.tableCell}>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleToggleRow(subscription.id)}
+                            disabled={!hasDevices}
+                          >
+                            {hasDevices && (
+                              openRows[subscription.id] ? (
+                                <KeyboardArrowUpIcon />
+                              ) : (
+                                <KeyboardArrowDownIcon />
+                              )
+                            )}
+                          </IconButton>
+                        </TableCell>
+                        <TableCell className={classes.tableCell}>{subscription.id || '-'}</TableCell>
+                        <TableCell className={classes.tableCell}>{cycle}</TableCell>
+                        <TableCell className={classes.tableCell}>{nextDueDate}</TableCell>
+                        <TableCell className={classes.tableCell}>{status}</TableCell>
+                        <TableCell align="right" className={classes.tableCellAmount}>
+                          {formatCurrency(value)}
+                        </TableCell>
+                      </TableRow>
+
+                      {hasDevices && (
+                        <TableRow>
+                          <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+                            <Collapse in={openRows[subscription.id]} timeout="auto" unmountOnExit>
+                              <Box sx={{ margin: 2 }}>
+                                <Typography variant="h6" sx={{ color: '#fff', mb: 1, fontSize: '1rem' }}>
+                                  Dispositivos desta assinatura
+                                </Typography>
+                                <Table size="small" aria-label="devices">
+                                  <TableHead>
+                                    <TableRow>
+                                      <TableCell className={classes.tableCell} sx={{ fontWeight: 'bold' }}>Dispositivo</TableCell>
+                                      <TableCell className={classes.tableCell} sx={{ fontWeight: 'bold' }}>Plano</TableCell>
+                                      <TableCell className={classes.tableCell} sx={{ fontWeight: 'bold' }} align="right">Valor</TableCell>
+                                    </TableRow>
+                                  </TableHead>
+                                  <TableBody>
+                                    {subscriptionDevices.map((device) => (
+                                      <TableRow key={device.id}>
+                                        <TableCell className={classes.tableCell}>{device.name}</TableCell>
+                                        <TableCell className={classes.tableCell}>{device.attributes?.planName || '-'}</TableCell>
+                                        <TableCell className={classes.tableCell} align="right">
+                                          {device.attributes?.planValue
+                                            ? formatCurrency(device.attributes.planValue)
+                                            : '-'}
+                                        </TableCell>
+                                      </TableRow>
+                                    ))}
+                                  </TableBody>
+                                </Table>
+                              </Box>
+                            </Collapse>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </React.Fragment>
                   );
                 } catch (err) {
                   return (
                     <TableRow key={subscription.id || 'error'} className={classes.tableRow}>
+                      <TableCell className={classes.tableCell} />
                       <TableCell className={classes.tableCell}>-</TableCell>
                       <TableCell className={classes.tableCell}>-</TableCell>
                       <TableCell className={classes.tableCell}>-</TableCell>
@@ -440,10 +561,7 @@ const BillingPage = () => {
               Total
             </Typography>
             <Typography className={classes.totalValue}>
-              {total.toLocaleString('pt-BR', {
-                style: 'currency',
-                currency: 'BRL',
-              })}
+              {formatCurrency(total)}
             </Typography>
           </CardContent>
         </Card>

@@ -16,10 +16,12 @@ import {
   CircularProgress,
   Collapse,
   IconButton,
+  Button,
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useAuth } from '../common/util/AuthContext';
 
 import Logo from '../resources/images/coragem-logo.png';
@@ -138,6 +140,14 @@ const useStyles = makeStyles((theme) => ({
     textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
     padding: theme.spacing(1),
     fontFamily: '"Montserrat", "Roboto", "Helvetica", "Arial", sans-serif',
+  },
+  backButton: {
+    marginBottom: theme.spacing(2),
+    color: '#ffffff',
+    backgroundColor: '#000000',
+    '&:hover': {
+      backgroundColor: '#333333',
+    },
   },
 }));
 
@@ -452,6 +462,11 @@ const BillingPage = () => {
     }
   };
 
+  // Handle back button click
+  const handleBackClick = () => {
+    navigate('/');
+  };
+
   return (
     <Box
       sx={{
@@ -463,8 +478,25 @@ const BillingPage = () => {
         width: '100%',
       }}
     >
-      <Box sx={{ mb: 4 }}>
+      <Box sx={{ mb: 4, width: '100%', maxWidth: '800px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <img className={classes.image} src={Logo} alt="Logo" />
+        <Button
+          variant="contained"
+          startIcon={<ArrowBackIcon />}
+          onClick={handleBackClick}
+          sx={{
+            alignSelf: 'flex-start',
+            backgroundColor: '#000000',
+            color: '#ffffff',
+            marginBottom: 2,
+            fontWeight: 600,
+            '&:hover': {
+              backgroundColor: '#333333',
+            },
+          }}
+        >
+          Voltar
+        </Button>
       </Box>
       <Paper className={classes.paper} elevation={3}>
         <Typography variant="h4" className={classes.header}>

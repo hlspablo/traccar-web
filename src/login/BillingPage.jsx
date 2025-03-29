@@ -385,6 +385,36 @@ const BillingPage = () => {
     }
   };
 
+  // Translate cycle values
+  const translateCycle = (cycleValue) => {
+    if (!cycleValue) return '-';
+
+    const translations = {
+      WEEKLY: 'Semanal',
+      BIWEEKLY: 'Quinzenal',
+      MONTHLY: 'Mensal',
+      BIMONTHLY: 'Bimestral',
+      QUARTERLY: 'Trimestral',
+      SEMIANNUALLY: 'Semestral',
+      YEARLY: 'Anual',
+    };
+
+    return translations[cycleValue.toUpperCase()] || cycleValue;
+  };
+
+  // Translate status values
+  const translateStatus = (statusValue) => {
+    if (!statusValue) return '-';
+
+    const translations = {
+      ACTIVE: 'Ativo',
+      EXPIRED: 'Expirado',
+      INACTIVE: 'Inativo',
+    };
+
+    return translations[statusValue.toUpperCase()] || statusValue;
+  };
+
   // Format currency for display
   const formatCurrency = (value) => {
     try {
@@ -468,19 +498,22 @@ const BillingPage = () => {
               {subscriptions.map((subscription) => {
                 try {
                   const value = subscription.value || 0;
-                  const cycle = subscription.cycle ? subscription.cycle.charAt(0).toUpperCase() + subscription.cycle.slice(1).toLowerCase() : '-';
+                  const cycle = translateCycle(subscription.cycle);
                   const nextDueDate = formatDate(subscription.nextDueDate);
-                  const status = subscription.status ? subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1).toLowerCase() : '-';
+                  const status = translateStatus(subscription.status);
                   const subscriptionDevices = getDevicesForSubscription(subscription.id);
                   const hasDevices = subscriptionDevices.length > 0;
 
                   return (
                     <React.Fragment key={subscription.id}>
-                      <TableRow className={classes.tableRow}>
+                      <TableRow
+                        className={classes.tableRow}
+                        onClick={() => hasDevices && handleToggleRow(subscription.id)}
+                        sx={{ cursor: hasDevices ? 'pointer' : 'default' }}
+                      >
                         <TableCell className={classes.tableCell}>
                           <IconButton
                             size="small"
-                            onClick={() => handleToggleRow(subscription.id)}
                             disabled={!hasDevices}
                           >
                             {hasDevices && (

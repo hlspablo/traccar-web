@@ -173,7 +173,7 @@ const BillingPage = () => {
         ...options,
         headers: {
           ...options.headers,
-          access_token: '$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OmFjZTU1MTFjLWU1OTItNGZiYy05MGYwLTlhNGM2ZGU2ZDNhMDo6JGFhY2hfZTQyODE5MjEtNjljZi00YTAwLWIxNjgtZGQxNzk1ZTU1Nzky',
+          access_token: import.meta.env.VITE_ASAAS_ACCESS_TOKEN || process.env.ASAAS_ACCESS_TOKEN,
         },
         signal: controller.signal,
       });

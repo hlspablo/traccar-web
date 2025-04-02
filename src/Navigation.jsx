@@ -10,6 +10,7 @@ import RegisterPage from './login/RegisterPage';
 import ResetPasswordPage from './login/ResetPasswordPage';
 import PrivacyPage from './login/PrivacyPage';
 import BillingPage from './login/BillingPage';
+import SupportPage from './login/SupportPage';
 import useQuery from './common/util/useQuery';
 import { useEffectAsync } from './reactHelper';
 
@@ -45,6 +46,7 @@ const Navigation = () => {
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/privacy" element={<PrivacyPage />} />
       <Route path="/billing" element={<BillingPage />} />
+      <Route path="/support" element={<SupportPage />} />
       <Route path="/" element={<App />}>
         <Route index element={<MainPage />} />
       </Route>

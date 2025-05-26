@@ -10,11 +10,13 @@ const PORT = process.env.PORT || 3001;
 const ASAAS_BASE_URL = 'https://api-sandbox.asaas.com';
 const ASAAS_ACCESS_TOKEN = process.env.ASAAS_ACCESS_TOKEN || '$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OmFjZTU1MTFjLWU1OTItNGZiYy05MGYwLTlhNGM2ZGU2ZDNhMDo6JGFhY2hfZTQyODE5MjEtNjljZi00YTAwLWIxNjgtZGQxNzk1ZTU1Nzky';
 
-// Create HTTPS agent with proper SSL configuration
+// Create HTTPS agent with simplified TLS configuration
 const httpsAgent = new https.Agent({
-  rejectUnauthorized: true,
-  secureProtocol: 'TLSv1_2_method',
-  ciphers: 'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384',
+  keepAlive: true,
+  keepAliveMsecs: 30000,
+  maxSockets: 50,
+  timeout: 30000,
+  // Use modern TLS configuration without conflicts
   minVersion: 'TLSv1.2',
   maxVersion: 'TLSv1.3',
 });
@@ -31,6 +33,37 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'asaas-proxy' });
 });
 
+// Test endpoint to check connection
+app.get('/test', async (req, res) => {
+  try {
+    const testUrl = `${ASAAS_BASE_URL}/v3/customers?limit=1`;
+    console.log(`Testing connection to: ${testUrl}`);
+
+    const response = await fetch(testUrl, {
+      method: 'GET',
+      headers: {
+        access_token: ASAAS_ACCESS_TOKEN,
+        'User-Agent': 'Asaas-Proxy-Test/1.0',
+      },
+      agent: httpsAgent,
+      timeout: 10000,
+    });
+
+    res.json({
+      status: 'Connection successful',
+      statusCode: response.status,
+      url: testUrl,
+    });
+  } catch (error) {
+    console.error('Test connection failed:', error);
+    res.status(500).json({
+      status: 'Connection failed',
+      error: error.message,
+      code: error.code,
+    });
+  }
+});
+
 // Proxy all requests to Asaas API
 app.all('/v3/*', async (req, res) => {
   try {
@@ -38,19 +71,23 @@ app.all('/v3/*', async (req, res) => {
 
     console.log(`Proxying ${req.method} ${asaasUrl}`);
 
-    // Prepare headers, removing problematic ones
+    // Prepare headers
     const headers = {
-      'Content-Type': 'application/json',
       access_token: ASAAS_ACCESS_TOKEN,
       'User-Agent': 'Asaas-Proxy/1.0',
+      Accept: 'application/json',
     };
 
-    // Only add request body for non-GET methods
+    // Only set Content-Type for requests with body
+    if (req.method !== 'GET' && req.body) {
+      headers['Content-Type'] = 'application/json';
+    }
+
     const requestOptions = {
       method: req.method,
       headers,
       agent: httpsAgent,
-      timeout: 30000, // 30 second timeout
+      timeout: 30000,
     };
 
     if (req.method !== 'GET' && req.body) {
@@ -69,12 +106,12 @@ app.all('/v3/*', async (req, res) => {
       data = await response.text();
     }
 
-    // Set response headers
+    // Set response status
     res.status(response.status);
 
-    // Copy relevant headers
-    const allowedHeaders = ['content-type', 'cache-control', 'etag'];
-    allowedHeaders.forEach((header) => {
+    // Copy safe headers
+    const safeHeaders = ['content-type', 'cache-control', 'etag', 'last-modified'];
+    safeHeaders.forEach((header) => {
       const value = response.headers.get(header);
       if (value) {
         res.set(header, value);
@@ -102,6 +139,12 @@ app.all('/v3/*', async (req, res) => {
         error: 'Request timeout',
         message: 'Request to Asaas API timed out',
       });
+    } else if (error.code === 'ERR_TLS_PROTOCOL_VERSION_CONFLICT') {
+      res.status(502).json({
+        error: 'TLS protocol conflict',
+        message: 'TLS configuration conflict - check server logs',
+        details: error.message,
+      });
     } else {
       res.status(500).json({
         error: 'Proxy error',
@@ -115,4 +158,5 @@ app.all('/v3/*', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Asaas proxy server running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`TLS reject unauthorized: ${process.env.NODE_TLS_REJECT_UNAUTHORIZED || 'default'}`);
 });

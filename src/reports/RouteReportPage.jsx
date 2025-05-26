@@ -24,6 +24,7 @@ import MapCamera from '../map/MapCamera';
 import MapGeofence from '../map/MapGeofence';
 import scheduleReport from './common/scheduleReport';
 import MapScale from '../map/MapScale';
+import { apiGet, apiPost } from '../common/util/api';
 
 const RouteReportPage = () => {
   const navigate = useNavigate();
@@ -50,36 +51,26 @@ const RouteReportPage = () => {
     if (type === 'export') {
       window.location.assign(`/api/reports/route/xlsx?${query.toString()}`);
     } else if (type === 'mail') {
-      const response = await fetch(`/api/reports/route/mail?${query.toString()}`);
-      if (!response.ok) {
-        throw Error(await response.text());
-      }
+      await apiPost(`/reports/route/mail?${query.toString()}`);
     } else {
       setLoading(true);
       try {
-        const response = await fetch(`/api/reports/route?${query.toString()}`, {
-          headers: { Accept: 'application/json' },
+        const items = await apiGet(`/reports/route?${query.toString()}`);
+        setItems(items);
+        const keySet = new Set();
+        const keyList = [];
+        items.forEach((position) => {
+          Object.keys(position).forEach((it) => keySet.add(it));
+          Object.keys(position.attributes).forEach((it) => keySet.add(it));
         });
-        if (response.ok) {
-          const data = await response.json();
-          const keySet = new Set();
-          const keyList = [];
-          data.forEach((position) => {
-            Object.keys(position).forEach((it) => keySet.add(it));
-            Object.keys(position.attributes).forEach((it) => keySet.add(it));
-          });
-          ['id', 'deviceId', 'outdated', 'network', 'attributes'].forEach((key) => keySet.delete(key));
-          Object.keys(positionAttributes).forEach((key) => {
-            if (keySet.has(key)) {
-              keyList.push(key);
-              keySet.delete(key);
-            }
-          });
-          setAvailable([...keyList, ...keySet].map((key) => [key, positionAttributes[key]?.name || key]));
-          setItems(data);
-        } else {
-          throw Error(await response.text());
-        }
+        ['id', 'deviceId', 'outdated', 'network', 'attributes'].forEach((key) => keySet.delete(key));
+        Object.keys(positionAttributes).forEach((key) => {
+          if (keySet.has(key)) {
+            keyList.push(key);
+            keySet.delete(key);
+          }
+        });
+        setAvailable([...keyList, ...keySet].map((key) => [key, positionAttributes[key]?.name || key]));
       } finally {
         setLoading(false);
       }

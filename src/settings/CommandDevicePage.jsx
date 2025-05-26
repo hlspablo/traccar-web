@@ -17,8 +17,7 @@ import SettingsMenu from './components/SettingsMenu';
 import { useCatch } from '../reactHelper';
 import { useRestriction } from '../common/util/permissions';
 import useSettingsStyles from './common/useSettingsStyles';
-import { buildApiUrl } from '../config/apiConfig';
-import { apiGet } from '../common/util/api';
+import { apiGet, apiPost } from '../common/util/api';
 
 const CommandDevicePage = () => {
   const navigate = useNavigate();
@@ -41,18 +40,8 @@ const CommandDevicePage = () => {
     }
 
     command.deviceId = parseInt(id, 10);
-
-    const response = await fetch(buildApiUrl('/commands/send'), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(command),
-    });
-
-    if (response.ok) {
-      navigate(-1);
-    } else {
-      throw Error(await response.text());
-    }
+    await apiPost('/commands/send', command);
+    navigate(-1);
   });
 
   const validate = () => savedId || (item && item.type);

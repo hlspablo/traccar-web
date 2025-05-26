@@ -23,6 +23,7 @@ import SelectField from '../common/components/SelectField';
 import { useCatch } from '../reactHelper';
 import { snackBarDurationLongMs } from '../common/util/duration';
 import useSettingsStyles from './common/useSettingsStyles';
+import { apiPost } from '../common/util/api';
 
 const allowedProperties = ['valid', 'latitude', 'longitude', 'altitude', 'speed', 'course', 'address', 'accuracy'];
 
@@ -46,19 +47,10 @@ const ComputedAttributePage = () => {
     stringify: (option) => option.name,
   });
 
-  const testAttribute = useCatch(async () => {
+  const handleTest = useCatch(async () => {
     const query = new URLSearchParams({ deviceId });
-    const url = `/api/attributes/computed/test?${query.toString()}`;
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(item),
-    });
-    if (response.ok) {
-      setResult(await response.text());
-    } else {
-      throw Error(await response.text());
-    }
+    const result = await apiPost(`/attributes/computed/test?${query.toString()}`, item);
+    setResult(result);
   });
 
   const validate = () => item && item.description && item.expression;
@@ -170,7 +162,7 @@ const ComputedAttributePage = () => {
               <Button
                 variant="outlined"
                 color="primary"
-                onClick={testAttribute}
+                onClick={handleTest}
                 disabled={!deviceId}
               >
                 {t('sharedTestExpression')}

@@ -26,6 +26,7 @@ import MapCamera from '../map/MapCamera';
 import MapGeofence from '../map/MapGeofence';
 import scheduleReport from './common/scheduleReport';
 import MapScale from '../map/MapScale';
+import { apiGet, apiPost } from '../common/util/api';
 
 const columnsArray = [
   ['startTime', 'reportStartTime'],
@@ -78,16 +79,8 @@ const TripReportPage = () => {
         from: selectedItem.startTime,
         to: selectedItem.endTime,
       });
-      const response = await fetch(`/api/reports/route?${query.toString()}`, {
-        headers: {
-          Accept: 'application/json',
-        },
-      });
-      if (response.ok) {
-        setRoute(await response.json());
-      } else {
-        throw Error(await response.text());
-      }
+      const route = await apiGet(`/reports/route?${query.toString()}`);
+      setRoute(route);
     } else {
       setRoute(null);
     }
@@ -98,21 +91,12 @@ const TripReportPage = () => {
     if (type === 'export') {
       window.location.assign(`/api/reports/trips/xlsx?${query.toString()}`);
     } else if (type === 'mail') {
-      const response = await fetch(`/api/reports/trips/mail?${query.toString()}`);
-      if (!response.ok) {
-        throw Error(await response.text());
-      }
+      await apiPost(`/reports/trips/mail?${query.toString()}`);
     } else {
       setLoading(true);
       try {
-        const response = await fetch(`/api/reports/trips?${query.toString()}`, {
-          headers: { Accept: 'application/json' },
-        });
-        if (response.ok) {
-          setItems(await response.json());
-        } else {
-          throw Error(await response.text());
-        }
+        const items = await apiGet(`/reports/trips?${query.toString()}`);
+        setItems(items);
       } finally {
         setLoading(false);
       }

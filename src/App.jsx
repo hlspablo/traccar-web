@@ -51,9 +51,12 @@ const App = () => {
   useEffectAsync(async () => {
     if (!user) {
       try {
+        console.log('🔍 Checking for existing session...');
         const sessionData = await apiGet('/session');
+        console.log('✅ Session found, user logged in:', sessionData.email || sessionData.name);
         dispatch(sessionActions.updateUser(sessionData));
       } catch (error) {
+        console.log('❌ No valid session found:', error.message);
         if (newServer) {
           navigate('/register');
         } else {

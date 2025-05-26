@@ -11,13 +11,16 @@ export const apiRequest = async (endpoint, options = {}) => {
     console.log(`🌐 API Request: ${options.method || 'GET'} ${url}`);
     console.log('🍪 Current cookies:', document.cookie);
 
+    // Prepare headers - don't set Content-Type for GET requests
+    const headers = { ...options.headers };
+    if (options.method !== 'GET' && !headers['Content-Type']) {
+      headers['Content-Type'] = 'application/json';
+    }
+
     const response = await fetch(url, {
       credentials: 'include', // Always include cookies for session authentication
       ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
+      headers,
     });
 
     console.log(`📡 Response: ${response.status} ${response.statusText}`);
@@ -25,6 +28,12 @@ export const apiRequest = async (endpoint, options = {}) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`❌ API Error: ${response.status} - ${errorText}`);
+
+      // Special handling for session-related errors
+      if (response.status === 401 && endpoint.includes('/session')) {
+        console.log('🔓 Session expired or invalid - cookies will be cleared on next login');
+      }
+
       throw new Error(errorText || `Request failed with status ${response.status}`);
     }
 

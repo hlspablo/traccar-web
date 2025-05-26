@@ -50,7 +50,7 @@ const DevicesPage = () => {
   }, [timestamp, showAll]);
 
   const handleExport = () => {
-    window.location.assign('/reports/devices/xlsx');
+    window.location.assign('/api/reports/devices/xlsx');
   };
 
   const actionConnections = {

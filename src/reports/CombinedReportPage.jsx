@@ -18,6 +18,7 @@ import { prefixString } from '../common/util/stringUtils';
 import MapMarkers from '../map/MapMarkers';
 import MapRouteCoordinates from '../map/MapRouteCoordinates';
 import MapScale from '../map/MapScale';
+import { apiGet } from '../common/util/api';
 
 const CombinedReportPage = () => {
   const classes = useReportStyles();
@@ -44,12 +45,8 @@ const CombinedReportPage = () => {
     groupIds.forEach((groupId) => query.append('groupId', groupId));
     setLoading(true);
     try {
-      const response = await fetch(`/api/reports/combined?${query.toString()}`);
-      if (response.ok) {
-        setItems(await response.json());
-      } else {
-        throw Error(await response.text());
-      }
+      const items = await apiGet(`/reports/combined?${query.toString()}`);
+      setItems(items);
     } finally {
       setLoading(false);
     }

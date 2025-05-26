@@ -15,6 +15,7 @@ import MapGeofence from '../map/MapGeofence';
 import StatusCard from '../common/components/StatusCard';
 import { formatNotificationTitle } from '../common/util/formatter';
 import MapScale from '../map/MapScale';
+import { apiGet } from '../common/util/api';
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -54,25 +55,16 @@ const EventPage = () => {
 
   useEffectAsync(async () => {
     if (id) {
-      const response = await fetch(`/api/events/${id}`);
-      if (response.ok) {
-        setEvent(await response.json());
-      } else {
-        throw Error(await response.text());
-      }
+      const event = await apiGet(`/events/${id}`);
+      setEvent(event);
     }
   }, [id]);
 
   useEffectAsync(async () => {
     if (event && event.positionId) {
-      const response = await fetch(`/api/positions?id=${event.positionId}`);
-      if (response.ok) {
-        const positions = await response.json();
-        if (positions.length > 0) {
-          setPosition(positions[0]);
-        }
-      } else {
-        throw Error(await response.text());
+      const positions = await apiGet(`/positions?id=${event.positionId}`);
+      if (positions.length > 0) {
+        setPosition(positions[0]);
       }
     }
   }, [event]);

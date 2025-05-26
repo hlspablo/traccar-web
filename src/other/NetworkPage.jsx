@@ -8,6 +8,7 @@ import makeStyles from '@mui/styles/makeStyles';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useEffectAsync } from '../reactHelper';
+import { apiGet } from '../common/util/api';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -35,14 +36,9 @@ const NetworkPage = () => {
 
   useEffectAsync(async () => {
     if (positionId) {
-      const response = await fetch(`/api/positions?id=${positionId}`);
-      if (response.ok) {
-        const positions = await response.json();
-        if (positions.length > 0) {
-          setItem(positions[0]);
-        }
-      } else {
-        throw Error(await response.text());
+      const positions = await apiGet(`/positions?id=${positionId}`);
+      if (positions.length > 0) {
+        setItem(positions[0]);
       }
     }
   }, [positionId]);

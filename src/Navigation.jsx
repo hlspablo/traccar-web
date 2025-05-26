@@ -62,6 +62,7 @@ import SubscriptionsPage from './settings/SubscriptionsPage';
 import SubscriptionPage from './settings/SubscriptionPage';
 import ViewSubscriptionPage from './settings/ViewSubscriptionPage';
 import SubscriptionsByUser from './settings/SubscriptionsByUser';
+import { apiGet } from './common/util/api';
 
 const Navigation = () => {
   const navigate = useNavigate();
@@ -79,14 +80,9 @@ const Navigation = () => {
       navigate(pathname);
     } else if (query.get('deviceId')) {
       const deviceId = query.get('deviceId');
-      const response = await fetch(`/api/devices?uniqueId=${deviceId}`);
-      if (response.ok) {
-        const items = await response.json();
-        if (items.length > 0) {
-          dispatch(devicesActions.selectId(items[0].id));
-        }
-      } else {
-        throw Error(await response.text());
+      const items = await apiGet(`/devices?uniqueId=${deviceId}`);
+      if (items.length > 0) {
+        dispatch(devicesActions.selectId(items[0].id));
       }
       navigate('/');
     } else if (query.get('eventId')) {

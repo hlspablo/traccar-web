@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffectAsync } from '../../reactHelper';
 import { sessionActions } from '../../store';
+import { apiPut } from '../util/api';
 
 export const nativeEnvironment = window.appInterface || (window.webkit && window.webkit.messageHandlers.appInterface);
 
@@ -51,17 +52,8 @@ const NativeInterface = () => {
           },
         };
 
-        const response = await fetch(`/api/users/${user.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(updatedUser),
-        });
-
-        if (response.ok) {
-          dispatch(sessionActions.updateUser(await response.json()));
-        } else {
-          throw Error(await response.text());
-        }
+        const result = await apiPut(`/users/${user.id}`, updatedUser);
+        dispatch(sessionActions.updateUser(result));
       }
     }
   }, [user, notificationToken, setNotificationToken]);

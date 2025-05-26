@@ -79,7 +79,8 @@ const TripReportPage = () => {
         from: selectedItem.startTime,
         to: selectedItem.endTime,
       });
-      const route = await apiGet(`/reports/route?${query.toString()}`);
+      const response = await apiGet(`/reports/route?${query.toString()}`);
+      const route = Array.isArray(response) ? response : [];
       setRoute(route);
     } else {
       setRoute(null);
@@ -95,8 +96,13 @@ const TripReportPage = () => {
     } else {
       setLoading(true);
       try {
-        const items = await apiGet(`/reports/trips?${query.toString()}`);
+        const response = await apiGet(`/reports/trips?${query.toString()}`);
+        const items = Array.isArray(response) ? response : [];
         setItems(items);
+      } catch (error) {
+        console.error('Error fetching trips data:', error);
+        setItems([]);
+        throw error;
       } finally {
         setLoading(false);
       }

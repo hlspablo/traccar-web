@@ -37,13 +37,20 @@ export const apiRequest = async (endpoint, options = {}) => {
       throw new Error(errorText || `Request failed with status ${response.status}`);
     }
 
+    // Handle 204 No Content responses
+    if (response.status === 204) {
+      return [];
+    }
+
     // Handle empty responses
     const contentType = response.headers.get('content-type');
     if (contentType && contentType.includes('application/json')) {
       return await response.json();
     }
 
-    return response;
+    // For non-JSON responses that are not 204, try to get text content
+    const text = await response.text();
+    return text || null;
   } catch (error) {
     console.error('API Request Error:', error);
     throw error;

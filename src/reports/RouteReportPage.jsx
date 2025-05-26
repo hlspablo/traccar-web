@@ -55,22 +55,42 @@ const RouteReportPage = () => {
     } else {
       setLoading(true);
       try {
-        const items = await apiGet(`/reports/route?${query.toString()}`);
+        const response = await apiGet(`/reports/route?${query.toString()}`);
+
+        // Ensure we have a valid array
+        const items = Array.isArray(response) ? response : [];
         setItems(items);
-        const keySet = new Set();
-        const keyList = [];
-        items.forEach((position) => {
-          Object.keys(position).forEach((it) => keySet.add(it));
-          Object.keys(position.attributes).forEach((it) => keySet.add(it));
-        });
-        ['id', 'deviceId', 'outdated', 'network', 'attributes'].forEach((key) => keySet.delete(key));
-        Object.keys(positionAttributes).forEach((key) => {
-          if (keySet.has(key)) {
-            keyList.push(key);
-            keySet.delete(key);
-          }
-        });
-        setAvailable([...keyList, ...keySet].map((key) => [key, positionAttributes[key]?.name || key]));
+
+        // Only process attributes if we have items
+        if (items.length > 0) {
+          const keySet = new Set();
+          const keyList = [];
+          items.forEach((position) => {
+            if (position && typeof position === 'object') {
+              Object.keys(position).forEach((it) => keySet.add(it));
+              if (position.attributes && typeof position.attributes === 'object') {
+                Object.keys(position.attributes).forEach((it) => keySet.add(it));
+              }
+            }
+          });
+          ['id', 'deviceId', 'outdated', 'network', 'attributes'].forEach((key) => keySet.delete(key));
+          Object.keys(positionAttributes).forEach((key) => {
+            if (keySet.has(key)) {
+              keyList.push(key);
+              keySet.delete(key);
+            }
+          });
+          setAvailable([...keyList, ...keySet].map((key) => [key, positionAttributes[key]?.name || key]));
+        } else {
+          // Reset available columns when no data
+          setAvailable([]);
+        }
+      } catch (error) {
+        console.error('Error fetching route data:', error);
+        // Reset state on error
+        setItems([]);
+        setAvailable([]);
+        throw error; // Re-throw to be handled by useCatch
       } finally {
         setLoading(false);
       }

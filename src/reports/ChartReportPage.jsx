@@ -43,11 +43,19 @@ const ChartReportPage = () => {
 
   const handleSubmit = useCatch(async ({ deviceId, from, to }) => {
     const query = new URLSearchParams({ deviceId, from, to });
-    const positions = await apiGet(`/reports/route?${query.toString()}`);
+    const response = await apiGet(`/reports/route?${query.toString()}`);
+
+    // Ensure we have a valid array
+    const positions = Array.isArray(response) ? response : [];
+
     const keySet = new Set();
     const keyList = [];
     const formattedPositions = positions.map((position) => {
-      const data = { ...position, ...position.attributes };
+      if (!position || typeof position !== 'object') {
+        return {};
+      }
+
+      const data = { ...position, ...(position.attributes || {}) };
       const formatted = {};
       formatted.fixTime = dayjs(position.fixTime).valueOf();
       formatted.deviceTime = dayjs(position.deviceTime).valueOf();

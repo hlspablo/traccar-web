@@ -16,7 +16,7 @@ export const API_CONFIG = {
   // Asaas API - Use proxy service to avoid CORS issues
   ASAAS_BASE_URL: isDevelopment
     ? '/asaas-proxy' // Use Vite proxy in development
-    : 'https://your-asaas-proxy.onrender.com', // Use deployed proxy service in production
+    : 'https://assass-proxy.onrender.com', // Use deployed proxy service in production
 
   // Asaas Access Token (handled by proxy service for security)
   ASAAS_ACCESS_TOKEN: '', // Not needed in frontend when using proxy

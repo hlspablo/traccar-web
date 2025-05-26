@@ -7,8 +7,12 @@ import { buildApiUrl } from '../../config/apiConfig';
 export const apiRequest = async (endpoint, options = {}) => {
   try {
     const url = buildApiUrl(endpoint);
+
+    console.log(`🌐 API Request: ${options.method || 'GET'} ${url}`);
+    console.log('🍪 Current cookies:', document.cookie);
+
     const response = await fetch(url, {
-      credentials: 'include',
+      credentials: 'include', // Always include cookies for session authentication
       ...options,
       headers: {
         'Content-Type': 'application/json',
@@ -16,8 +20,11 @@ export const apiRequest = async (endpoint, options = {}) => {
       },
     });
 
+    console.log(`📡 Response: ${response.status} ${response.statusText}`);
+
     if (!response.ok) {
       const errorText = await response.text();
+      console.error(`❌ API Error: ${response.status} - ${errorText}`);
       throw new Error(errorText || `Request failed with status ${response.status}`);
     }
 

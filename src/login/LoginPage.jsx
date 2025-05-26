@@ -117,6 +117,8 @@ const LoginPage = () => {
       const query = `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
       const body = code.length ? `${query}&code=${code}` : query;
 
+      console.log('🔐 Attempting login...');
+
       // Use fetch with credentials for login to ensure cookie is stored
       const response = await fetch(buildApiUrl('/session'), {
         method: 'POST',
@@ -129,6 +131,12 @@ const LoginPage = () => {
 
       if (response.ok) {
         const user = await response.json();
+
+        // Debug: Check if cookies are stored
+        console.log('✅ Login successful');
+        console.log('🍪 All cookies:', document.cookie);
+        console.log('📝 Response headers:', response.headers);
+
         generateLoginToken();
         dispatch(sessionActions.updateUser(user));
         navigate('/');
@@ -138,6 +146,7 @@ const LoginPage = () => {
         throw Error(await response.text());
       }
     } catch (error) {
+      console.error('❌ Login failed:', error);
       setFailed(true);
       setPassword('');
     }

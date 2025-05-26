@@ -83,6 +83,7 @@ const LoginPage = () => {
         const expiration = dayjs().add(6, 'months').toISOString();
         const response = await fetch(buildApiUrl('/session/token'), {
           method: 'POST',
+          credentials: 'include',
           body: new URLSearchParams(`expiration=${expiration}`),
         });
         if (response.ok) {
@@ -98,6 +99,7 @@ const LoginPage = () => {
   const handleTokenLogin = useCatch(async (token) => {
     const response = await fetch(buildApiUrl('/session/token'), {
       method: 'POST',
+      credentials: 'include',
       body: new URLSearchParams(`token=${encodeURIComponent(token)}`),
     });
     if (response.ok) {
@@ -113,10 +115,18 @@ const LoginPage = () => {
     setFailed(false);
     try {
       const query = `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
+      const body = code.length ? `${query}&code=${code}` : query;
+
+      // Use fetch with credentials for login to ensure cookie is stored
       const response = await fetch(buildApiUrl('/session'), {
         method: 'POST',
-        body: new URLSearchParams(code.length ? `${query}&code=${code}` : query),
+        credentials: 'include', // Critical: ensures session cookie gets stored
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams(body),
       });
+
       if (response.ok) {
         const user = await response.json();
         generateLoginToken();

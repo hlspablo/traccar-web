@@ -20,6 +20,7 @@ import { useTranslation } from '../common/components/LocalizationProvider';
 import PageLayout from '../common/components/PageLayout';
 import SettingsMenu from './components/SettingsMenu';
 import { formatTime } from '../common/util/formatter';
+import { apiGet } from '../common/util/api';
 
 const SubscriptionsByUser = () => {
   const t = useTranslation();
@@ -85,12 +86,7 @@ const SubscriptionsByUser = () => {
       setError(null);
       try {
         // Fetch user data
-        const userResponse = await fetch(`/api/users/${id}`);
-        if (!userResponse.ok) {
-          throw new Error(`Failed to fetch user: ${userResponse.status}`);
-        }
-
-        const userData = await userResponse.json();
+        const userData = await apiGet(`/users/${id}`);
         setUser(userData);
 
         // Get subscription IDs from user attributes

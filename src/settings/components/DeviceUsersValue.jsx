@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from '@mui/material';
 import { useCatch } from '../../reactHelper';
 import { useTranslation } from '../../common/components/LocalizationProvider';
+import { apiGet } from '../../common/util/api';
 
 const DeviceUsersValue = ({ deviceId }) => {
   const t = useTranslation();
@@ -10,12 +11,8 @@ const DeviceUsersValue = ({ deviceId }) => {
 
   const loadUsers = useCatch(async () => {
     const query = new URLSearchParams({ deviceId });
-    const response = await fetch(`/api/users?${query.toString()}`);
-    if (response.ok) {
-      setUsers(await response.json());
-    } else {
-      throw Error(await response.text());
-    }
+    const users = await apiGet(`/users?${query.toString()}`);
+    setUsers(users);
   });
 
   if (users) {

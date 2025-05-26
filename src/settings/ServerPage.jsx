@@ -34,6 +34,7 @@ import useMapStyles from '../map/core/useMapStyles';
 import { map } from '../map/core/MapView';
 import useSettingsStyles from './common/useSettingsStyles';
 import { buildApiUrl } from '../config/apiConfig';
+import { apiPost } from '../common/util/api';
 
 const ServerPage = () => {
   const classes = useSettingsStyles();
@@ -52,13 +53,7 @@ const ServerPage = () => {
   const handleFiles = useCatch(async (files) => {
     if (files.length > 0) {
       const file = files[0];
-      const response = await fetch(`/api/server/file/${file.path}`, {
-        method: 'POST',
-        body: file,
-      });
-      if (!response.ok) {
-        throw Error(await response.text());
-      }
+      await apiPost(`/server/file/${file.path}`, file);
     }
   });
 

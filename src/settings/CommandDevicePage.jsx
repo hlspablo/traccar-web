@@ -18,6 +18,7 @@ import { useCatch } from '../reactHelper';
 import { useRestriction } from '../common/util/permissions';
 import useSettingsStyles from './common/useSettingsStyles';
 import { buildApiUrl } from '../config/apiConfig';
+import { apiGet } from '../common/util/api';
 
 const CommandDevicePage = () => {
   const navigate = useNavigate();
@@ -34,12 +35,7 @@ const CommandDevicePage = () => {
   const handleSend = useCatch(async () => {
     let command;
     if (savedId) {
-      const response = await fetch(`/api/commands/${savedId}`);
-      if (response.ok) {
-        command = await response.json();
-      } else {
-        throw Error(await response.text());
-      }
+      command = await apiGet(`/commands/${savedId}`);
     } else {
       command = item;
     }

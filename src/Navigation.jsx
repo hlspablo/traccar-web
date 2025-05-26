@@ -76,7 +76,7 @@ const Navigation = () => {
   useEffectAsync(async () => {
     if (query.get('token')) {
       const token = query.get('token');
-      await fetch(`/api/session?token=${encodeURIComponent(token)}`);
+      await apiGet(`/session?token=${encodeURIComponent(token)}`);
       navigate(pathname);
     } else if (query.get('deviceId')) {
       const deviceId = query.get('deviceId');

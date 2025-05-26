@@ -23,6 +23,7 @@ import SettingsMenu from './components/SettingsMenu';
 import SelectUserField from '../common/components/SelectUserField';
 import SelectDeviceField from '../common/components/SelectDeviceField';
 import useSettingsStyles from './common/useSettingsStyles';
+import { apiPost } from '../common/util/api';
 
 const SubscriptionPage = () => {
   const classes = useSettingsStyles();
@@ -95,47 +96,13 @@ const SubscriptionPage = () => {
       };
 
       // Send the POST request to enable billing using the standard API pattern
-      const response = await fetch(`/api/users/${item.userId}/enableBilling`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-      });
+      await apiPost(`/users/${item.userId}/enableBilling`, requestBody);
+      setSuccess('Subscription created successfully');
 
-      if (response.ok) {
-        setSuccess('Subscription created successfully');
-
-        // Navigate to the subscriptions page after a delay
-        setTimeout(() => {
-          navigate('/settings/subscriptions');
-        }, 1500);
-      } else {
-        // Handle error responses
-        let errorMessage = `Error: ${response.status} ${response.statusText}`;
-
-        try {
-          // Try to get the response text
-          const responseText = await response.text();
-
-          if (responseText) {
-            try {
-              const errorData = JSON.parse(responseText);
-              if (errorData && errorData.message) {
-                errorMessage = errorData.message;
-              }
-            } catch (parseError) {
-              // If not valid JSON, use the text as is
-              errorMessage = responseText;
-            }
-          }
-        } catch (error) {
-          console.error('Error reading response:', error);
-        }
-
-        throw new Error(errorMessage);
-      }
+      // Navigate to the subscriptions page after a delay
+      setTimeout(() => {
+        navigate('/settings/subscriptions');
+      }, 1500);
     } catch (err) {
       console.error('Error creating subscription:', err);
       setError(err.message || 'Failed to create subscription');

@@ -18,6 +18,7 @@ import { useCatch } from '../reactHelper';
 import { useAttributePreference } from '../common/util/preferences';
 import { distanceFromMeters, distanceToMeters, distanceUnitString } from '../common/util/converter';
 import useSettingsStyles from './common/useSettingsStyles';
+import { apiPut } from '../common/util/api';
 
 const AccumulatorsPage = () => {
   const navigate = useNavigate();
@@ -42,17 +43,8 @@ const AccumulatorsPage = () => {
   }, [deviceId, position]);
 
   const handleSave = useCatch(async () => {
-    const response = await fetch(`/api/devices/${deviceId}/accumulators`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(item),
-    });
-
-    if (response.ok) {
-      navigate(-1);
-    } else {
-      throw Error(await response.text());
-    }
+    await apiPut(`/devices/${deviceId}/accumulators`, item);
+    navigate(-1);
   });
 
   return (

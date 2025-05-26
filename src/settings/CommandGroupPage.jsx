@@ -22,6 +22,7 @@ import PageLayout from '../common/components/PageLayout';
 import SettingsMenu from './components/SettingsMenu';
 import { useCatch } from '../reactHelper';
 import useSettingsStyles from './common/useSettingsStyles';
+import { apiPost } from '../common/util/api';
 
 const CommandDevicePage = () => {
   const navigate = useNavigate();
@@ -36,17 +37,8 @@ const CommandDevicePage = () => {
 
   const handleSend = useCatch(async () => {
     const query = new URLSearchParams({ groupId: id });
-    const response = await fetch(`/api/commands/send?${query.toString()}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(item),
-    });
-
-    if (response.ok) {
-      navigate(-1);
-    } else {
-      throw Error(await response.text());
-    }
+    await apiPost(`/commands/send?${query.toString()}`, item);
+    navigate(-1);
   });
 
   return (

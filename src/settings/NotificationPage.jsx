@@ -18,6 +18,7 @@ import SelectField from '../common/components/SelectField';
 import SettingsMenu from './components/SettingsMenu';
 import { useCatch } from '../reactHelper';
 import useSettingsStyles from './common/useSettingsStyles';
+import { apiPost } from '../common/util/api';
 
 const NotificationPage = () => {
   const classes = useSettingsStyles();
@@ -32,14 +33,7 @@ const NotificationPage = () => {
 
   const testNotificators = useCatch(async () => {
     await Promise.all(item.notificators.split(/[, ]+/).map(async (notificator) => {
-      const response = await fetch(`/api/notifications/test/${notificator}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(item),
-      });
-      if (!response.ok) {
-        throw Error(await response.text());
-      }
+      await apiPost(`/notifications/test/${notificator}`, item);
     }));
   });
 

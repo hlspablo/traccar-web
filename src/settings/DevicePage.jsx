@@ -23,6 +23,7 @@ import useCommonDeviceAttributes from '../common/attributes/useCommonDeviceAttri
 import { useCatch } from '../reactHelper';
 import useQuery from '../common/util/useQuery';
 import useSettingsStyles from './common/useSettingsStyles';
+import { apiPost } from '../common/util/api';
 
 const DevicePage = () => {
   const classes = useSettingsStyles();
@@ -40,15 +41,11 @@ const DevicePage = () => {
 
   const handleFiles = useCatch(async (files) => {
     if (files.length > 0) {
-      const response = await fetch(`/api/devices/${item.id}/image`, {
-        method: 'POST',
-        body: files[0],
-      });
-      if (response.ok) {
-        setItem({ ...item, attributes: { ...item.attributes, deviceImage: await response.text() } });
-      } else {
-        throw Error(await response.text());
-      }
+      const formData = new FormData();
+      formData.append('file', files[0]);
+      const response = await apiPost(`/devices/${item.id}/image`, formData);
+      // The response contains the image filename
+      setItem({ ...item, attributes: { ...item.attributes, deviceImage: response } });
     }
   });
 

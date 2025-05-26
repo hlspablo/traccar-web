@@ -24,6 +24,7 @@ import PageLayout from '../common/components/PageLayout';
 import SettingsMenu from './components/SettingsMenu';
 import { formatTime } from '../common/util/formatter';
 import { buildApiUrl } from '../config/apiConfig';
+import { apiGet } from '../common/util/api';
 
 const ViewSubscriptionPage = () => {
   const t = useTranslation();
@@ -94,13 +95,8 @@ const ViewSubscriptionPage = () => {
           try {
             // Fetch user
             const userId = data.externalReference.split('-')[0];
-            const userResponse = await fetch(`/api/users/${userId}`);
-            if (userResponse.ok) {
-              const userData = await userResponse.json();
-              setUser(userData);
-            } else {
-              console.warn('Failed to fetch user data');
-            }
+            const userData = await apiGet(`/users/${userId}`);
+            setUser(userData);
 
             // Fetch user devices
             const devicesResponse = await fetch(buildApiUrl('/devices'));

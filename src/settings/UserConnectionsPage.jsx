@@ -35,8 +35,8 @@ const UserConnectionsPage = () => {
           </AccordionSummary>
           <AccordionDetails className={classes.details}>
             <LinkField
-              endpointAll="/api/devices?all=true"
-              endpointLinked={`/api/devices?userId=${id}`}
+              endpointAll="/devices?all=true"
+              endpointLinked={`/devices?userId=${id}`}
               baseId={id}
               keyBase="userId"
               keyLink="deviceId"
@@ -44,24 +44,24 @@ const UserConnectionsPage = () => {
               label={t('deviceTitle')}
             />
             <LinkField
-              endpointAll="/api/groups?all=true"
-              endpointLinked={`/api/groups?userId=${id}`}
+              endpointAll="/groups?all=true"
+              endpointLinked={`/groups?userId=${id}`}
               baseId={id}
               keyBase="userId"
               keyLink="groupId"
               label={t('settingsGroups')}
             />
             <LinkField
-              endpointAll="/api/geofences?all=true"
-              endpointLinked={`/api/geofences?userId=${id}`}
+              endpointAll="/geofences?all=true"
+              endpointLinked={`/geofences?userId=${id}`}
               baseId={id}
               keyBase="userId"
               keyLink="geofenceId"
               label={t('sharedGeofences')}
             />
             <LinkField
-              endpointAll="/api/notifications?all=true"
-              endpointLinked={`/api/notifications?userId=${id}`}
+              endpointAll="/notifications?all=true"
+              endpointLinked={`/notifications?userId=${id}`}
               baseId={id}
               keyBase="userId"
               keyLink="notificationId"
@@ -69,24 +69,24 @@ const UserConnectionsPage = () => {
               label={t('sharedNotifications')}
             />
             <LinkField
-              endpointAll="/api/calendars?all=true"
-              endpointLinked={`/api/calendars?userId=${id}`}
+              endpointAll="/calendars?all=true"
+              endpointLinked={`/calendars?userId=${id}`}
               baseId={id}
               keyBase="userId"
               keyLink="calendarId"
               label={t('sharedCalendars')}
             />
             <LinkField
-              endpointAll="/api/users?all=true"
-              endpointLinked={`/api/users?userId=${id}`}
+              endpointAll="/users?all=true"
+              endpointLinked={`/users?userId=${id}`}
               baseId={id}
               keyBase="userId"
               keyLink="managedUserId"
               label={t('settingsUsers')}
             />
             <LinkField
-              endpointAll="/api/attributes/computed?all=true"
-              endpointLinked={`/api/attributes/computed?userId=${id}`}
+              endpointAll="/attributes/computed?all=true"
+              endpointLinked={`/attributes/computed?userId=${id}`}
               baseId={id}
               keyBase="userId"
               keyLink="attributeId"
@@ -94,8 +94,8 @@ const UserConnectionsPage = () => {
               label={t('sharedComputedAttributes')}
             />
             <LinkField
-              endpointAll="/api/drivers?all=true"
-              endpointLinked={`/api/drivers?userId=${id}`}
+              endpointAll="/drivers?all=true"
+              endpointLinked={`/drivers?userId=${id}`}
               baseId={id}
               keyBase="userId"
               keyLink="driverId"
@@ -103,8 +103,8 @@ const UserConnectionsPage = () => {
               label={t('sharedDrivers')}
             />
             <LinkField
-              endpointAll="/api/commands?all=true"
-              endpointLinked={`/api/commands?userId=${id}`}
+              endpointAll="/commands?all=true"
+              endpointLinked={`/commands?userId=${id}`}
               baseId={id}
               keyBase="userId"
               keyLink="commandId"
@@ -112,8 +112,8 @@ const UserConnectionsPage = () => {
               label={t('sharedSavedCommands')}
             />
             <LinkField
-              endpointAll="/api/maintenance?all=true"
-              endpointLinked={`/api/maintenance?userId=${id}`}
+              endpointAll="/maintenance?all=true"
+              endpointLinked={`/maintenance?userId=${id}`}
               baseId={id}
               keyBase="userId"
               keyLink="maintenanceId"

@@ -164,7 +164,7 @@ const ComputedAttributePage = () => {
               <SelectField
                 value={deviceId}
                 onChange={(e) => setDeviceId(Number(e.target.value))}
-                endpoint="/api/devices"
+                endpoint="/devices"
                 label={t('sharedDevice')}
               />
               <Button

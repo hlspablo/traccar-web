@@ -38,16 +38,16 @@ const GroupConnectionsPage = () => {
           </AccordionSummary>
           <AccordionDetails className={classes.details}>
             <LinkField
-              endpointAll="/api/geofences"
-              endpointLinked={`/api/geofences?groupId=${id}`}
+              endpointAll="/geofences"
+              endpointLinked={`/geofences?groupId=${id}`}
               baseId={id}
               keyBase="groupId"
               keyLink="geofenceId"
               label={t('sharedGeofences')}
             />
             <LinkField
-              endpointAll="/api/notifications"
-              endpointLinked={`/api/notifications?groupId=${id}`}
+              endpointAll="/notifications"
+              endpointLinked={`/notifications?groupId=${id}`}
               baseId={id}
               keyBase="groupId"
               keyLink="notificationId"
@@ -56,8 +56,8 @@ const GroupConnectionsPage = () => {
             />
             {!features.disableDrivers && (
               <LinkField
-                endpointAll="/api/drivers"
-                endpointLinked={`/api/drivers?groupId=${id}`}
+                endpointAll="/drivers"
+                endpointLinked={`/drivers?groupId=${id}`}
                 baseId={id}
                 keyBase="groupId"
                 keyLink="driverId"
@@ -67,8 +67,8 @@ const GroupConnectionsPage = () => {
             )}
             {!features.disableComputedAttributes && (
               <LinkField
-                endpointAll="/api/attributes/computed"
-                endpointLinked={`/api/attributes/computed?groupId=${id}`}
+                endpointAll="/attributes/computed"
+                endpointLinked={`/attributes/computed?groupId=${id}`}
                 baseId={id}
                 keyBase="groupId"
                 keyLink="attributeId"
@@ -78,8 +78,8 @@ const GroupConnectionsPage = () => {
             )}
             {!features.disableSavedCommands && (
               <LinkField
-                endpointAll="/api/commands"
-                endpointLinked={`/api/commands?groupId=${id}`}
+                endpointAll="/commands"
+                endpointLinked={`/commands?groupId=${id}`}
                 baseId={id}
                 keyBase="groupId"
                 keyLink="commandId"
@@ -89,8 +89,8 @@ const GroupConnectionsPage = () => {
             )}
             {!features.disableMaintenance && (
               <LinkField
-                endpointAll="/api/maintenance"
-                endpointLinked={`/api/maintenance?groupId=${id}`}
+                endpointAll="/maintenance"
+                endpointLinked={`/maintenance?groupId=${id}`}
                 baseId={id}
                 keyBase="groupId"
                 keyLink="maintenanceId"

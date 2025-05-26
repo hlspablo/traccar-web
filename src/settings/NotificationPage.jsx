@@ -85,7 +85,7 @@ const NotificationPage = () => {
                 multiple
                 value={item.notificators ? item.notificators.split(/[, ]+/) : []}
                 onChange={(e) => setItem({ ...item, notificators: e.target.value.join() })}
-                endpoint="/api/notifications/notificators"
+                endpoint="/notifications/notificators"
                 keyGetter={(it) => it.type}
                 titleGetter={(it) => t(prefixString('notificator', it.type))}
                 label={t('notificationNotificators')}
@@ -94,7 +94,7 @@ const NotificationPage = () => {
                 <SelectField
                   value={item.commandId}
                   onChange={(event) => setItem({ ...item, commandId: Number(event.target.value) })}
-                  endpoint="/api/commands"
+                  endpoint="/commands"
                   titleGetter={(it) => it.description}
                   label={t('sharedSavedCommand')}
                 />
@@ -130,7 +130,7 @@ const NotificationPage = () => {
               <SelectField
                 value={item.calendarId}
                 onChange={(event) => setItem({ ...item, calendarId: Number(event.target.value) })}
-                endpoint="/api/calendars"
+                endpoint="/calendars"
                 label={t('sharedCalendar')}
               />
             </AccordionDetails>

@@ -96,7 +96,7 @@ const DevicePage = () => {
               <SelectField
                 value={item.groupId}
                 onChange={(event) => setItem({ ...item, groupId: Number(event.target.value) })}
-                endpoint="/api/groups"
+                endpoint="/groups"
                 label={t('groupParent')}
               />
               <TextField
@@ -126,7 +126,7 @@ const DevicePage = () => {
               <SelectField
                 value={item.calendarId}
                 onChange={(event) => setItem({ ...item, calendarId: Number(event.target.value) })}
-                endpoint="/api/calendars"
+                endpoint="/calendars"
                 label={t('sharedCalendar')}
               />
               <TextField

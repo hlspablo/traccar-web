@@ -169,7 +169,7 @@ const ReportFilter = ({
             <SelectField
               value={calendarId}
               onChange={(event) => setCalendarId(Number(event.target.value))}
-              endpoint="/api/calendars"
+              endpoint="/calendars"
               label={t('sharedCalendar')}
               fullWidth
             />

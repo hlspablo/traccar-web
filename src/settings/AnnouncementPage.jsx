@@ -56,13 +56,13 @@ const AnnouncementPage = () => {
               multiple
               value={users}
               onChange={(e) => setUsers(e.target.value)}
-              endpoint="/api/users"
+              endpoint="/users"
               label={t('settingsUsers')}
             />
             <SelectField
               value={notificator}
               onChange={(e) => setNotificator(e.target.value)}
-              endpoint="/api/notifications/notificators?announcement=true"
+              endpoint="/notifications/notificators?announcement=true"
               keyGetter={(it) => it.type}
               titleGetter={(it) => t(prefixString('notificator', it.type))}
               label={t('notificationNotificators')}

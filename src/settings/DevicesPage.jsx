@@ -38,7 +38,7 @@ const DevicesPage = () => {
     setLoading(true);
     try {
       const query = new URLSearchParams({ all: showAll });
-      const response = await fetch(`/api/devices?${query.toString()}`);
+      const response = await fetch(`/devices?${query.toString()}`);
       if (response.ok) {
         setItems(await response.json());
       } else {
@@ -50,7 +50,7 @@ const DevicesPage = () => {
   }, [timestamp, showAll]);
 
   const handleExport = () => {
-    window.location.assign('/api/reports/devices/xlsx');
+    window.location.assign('/reports/devices/xlsx');
   };
 
   const actionConnections = {

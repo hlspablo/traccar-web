@@ -20,7 +20,7 @@ const EditItemView = ({
   useEffectAsync(async () => {
     if (!item) {
       if (id) {
-        const response = await fetch(`/api/${endpoint}/${id}`);
+        const response = await fetch(`/${endpoint}/${id}`);
         if (response.ok) {
           setItem(await response.json());
         } else {
@@ -33,7 +33,7 @@ const EditItemView = ({
   }, [id, item, defaultItem]);
 
   const handleSave = useCatch(async () => {
-    let url = `/api/${endpoint}`;
+    let url = `/${endpoint}`;
     if (id) {
       url += `/${id}`;
     }

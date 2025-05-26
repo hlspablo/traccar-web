@@ -38,16 +38,16 @@ const DeviceConnectionsPage = () => {
           </AccordionSummary>
           <AccordionDetails className={classes.details}>
             <LinkField
-              endpointAll="/api/geofences"
-              endpointLinked={`/api/geofences?deviceId=${id}`}
+              endpointAll="/geofences"
+              endpointLinked={`/geofences?deviceId=${id}`}
               baseId={id}
               keyBase="deviceId"
               keyLink="geofenceId"
               label={t('sharedGeofences')}
             />
             <LinkField
-              endpointAll="/api/notifications"
-              endpointLinked={`/api/notifications?deviceId=${id}`}
+              endpointAll="/notifications"
+              endpointLinked={`/notifications?deviceId=${id}`}
               baseId={id}
               keyBase="deviceId"
               keyLink="notificationId"
@@ -56,8 +56,8 @@ const DeviceConnectionsPage = () => {
             />
             {!features.disableDrivers && (
               <LinkField
-                endpointAll="/api/drivers"
-                endpointLinked={`/api/drivers?deviceId=${id}`}
+                endpointAll="/drivers"
+                endpointLinked={`/drivers?deviceId=${id}`}
                 baseId={id}
                 keyBase="deviceId"
                 keyLink="driverId"
@@ -67,8 +67,8 @@ const DeviceConnectionsPage = () => {
             )}
             {!features.disableComputedAttributes && (
               <LinkField
-                endpointAll="/api/attributes/computed"
-                endpointLinked={`/api/attributes/computed?deviceId=${id}`}
+                endpointAll="/attributes/computed"
+                endpointLinked={`/attributes/computed?deviceId=${id}`}
                 baseId={id}
                 keyBase="deviceId"
                 keyLink="attributeId"
@@ -78,8 +78,8 @@ const DeviceConnectionsPage = () => {
             )}
             {!features.disableSavedCommands && (
               <LinkField
-                endpointAll="/api/commands"
-                endpointLinked={`/api/commands?deviceId=${id}`}
+                endpointAll="/commands"
+                endpointLinked={`/commands?deviceId=${id}`}
                 baseId={id}
                 keyBase="deviceId"
                 keyLink="commandId"
@@ -89,8 +89,8 @@ const DeviceConnectionsPage = () => {
             )}
             {!features.disableMaintenance && (
               <LinkField
-                endpointAll="/api/maintenance"
-                endpointLinked={`/api/maintenance?deviceId=${id}`}
+                endpointAll="/maintenance"
+                endpointLinked={`/maintenance?deviceId=${id}`}
                 baseId={id}
                 keyBase="deviceId"
                 keyLink="maintenanceId"

@@ -4,18 +4,21 @@ import svgr from 'vite-plugin-svgr';
 import { VitePWA } from 'vite-plugin-pwa';
 
 /* eslint-disable no-template-curly-in-string */
-export default defineConfig(() => ({
+export default defineConfig(({ mode }) => ({
   server: {
     port: 3000,
-    proxy: {
-      '/api/socket': 'ws://coragemserver.top',
-      '/api': 'http://coragemserver.top',
-      '/asaas-proxy': {
-        target: 'https://api-sandbox.asaas.com',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/asaas-proxy/, ''),
+    // Only use proxy in development
+    ...(mode === 'development' && {
+      proxy: {
+        '/api/socket': 'ws://coragemserver.top',
+        '/api': 'http://coragemserver.top',
+        '/asaas-proxy': {
+          target: 'https://api-sandbox.asaas.com',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/asaas-proxy/, ''),
+        },
       },
-    },
+    }),
   },
   build: {
     outDir: 'build',

@@ -10,6 +10,7 @@ import alarm from './resources/alarm.mp3';
 import { eventsActions } from './store/events';
 import useFeatures from './common/util/useFeatures';
 import { useAttributePreference } from './common/util/preferences';
+import { API_CONFIG, buildApiUrl } from './config/apiConfig';
 
 const logoutCode = 4000;
 
@@ -33,8 +34,7 @@ const SocketController = () => {
   const features = useFeatures();
 
   const connectSocket = () => {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const socket = new WebSocket(`${protocol}//${window.location.host}/api/socket`);
+    const socket = new WebSocket(API_CONFIG.WEBSOCKET_URL);
     socketRef.current = socket;
 
     socket.onopen = () => {
@@ -45,11 +45,11 @@ const SocketController = () => {
       dispatch(sessionActions.updateSocket(false));
       if (event.code !== logoutCode) {
         try {
-          const devicesResponse = await fetch('/api/devices');
+          const devicesResponse = await fetch(buildApiUrl('/devices'));
           if (devicesResponse.ok) {
             dispatch(devicesActions.update(await devicesResponse.json()));
           }
-          const positionsResponse = await fetch('/api/positions');
+          const positionsResponse = await fetch(buildApiUrl('/positions'));
           if (positionsResponse.ok) {
             dispatch(sessionActions.updatePositions(await positionsResponse.json()));
           }

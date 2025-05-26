@@ -1,28 +1,27 @@
-import { buildApiUrl } from '../../config/apiConfig';
+import { apiPost } from '../../common/util/api';
 
-export default async (deviceIds, groupIds, report) => {
-  const response = await fetch(buildApiUrl('/reports'), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(report),
-  });
-  if (response.ok) {
-    report = await response.json();
+const scheduleReport = async (deviceIds, groupIds, report) => {
+  try {
+    const newReport = await apiPost('/reports', report);
+
     if (deviceIds.length) {
-      await fetch(buildApiUrl('/permissions/bulk'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(deviceIds.map((id) => ({ deviceId: id, reportId: report.id }))),
-      });
+      await apiPost(
+        '/permissions/bulk',
+        deviceIds.map((id) => ({ deviceId: id, reportId: newReport.id })),
+      );
     }
+
     if (groupIds.length) {
-      await fetch(buildApiUrl('/permissions/bulk'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(groupIds.map((id) => ({ groupId: id, reportId: report.id }))),
-      });
+      await apiPost(
+        '/permissions/bulk',
+        groupIds.map((id) => ({ groupId: id, reportId: newReport.id })),
+      );
     }
+
     return null;
+  } catch (error) {
+    return error.message;
   }
-  return response.text();
 };
+
+export default scheduleReport;

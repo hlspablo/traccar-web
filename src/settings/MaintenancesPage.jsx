@@ -15,7 +15,7 @@ import CollectionActions from './components/CollectionActions';
 import TableShimmer from '../common/components/TableShimmer';
 import SearchHeader, { filterByKeyword } from './components/SearchHeader';
 import useSettingsStyles from './common/useSettingsStyles';
-import { buildApiUrl } from '../config/apiConfig';
+import { apiGet } from '../common/util/api';
 
 const MaintenacesPage = () => {
   const classes = useSettingsStyles();
@@ -33,12 +33,8 @@ const MaintenacesPage = () => {
   useEffectAsync(async () => {
     setLoading(true);
     try {
-      const response = await fetch(buildApiUrl('/maintenance'));
-      if (response.ok) {
-        setItems(await response.json());
-      } else {
-        throw Error(await response.text());
-      }
+      const items = await apiGet('/maintenance');
+      setItems(items);
     } finally {
       setLoading(false);
     }

@@ -11,7 +11,7 @@ import PageLayout from '../common/components/PageLayout';
 import ReportsMenu from './components/ReportsMenu';
 import TableShimmer from '../common/components/TableShimmer';
 import RemoveDialog from '../common/components/RemoveDialog';
-import { buildApiUrl } from '../config/apiConfig';
+import { apiGet } from '../common/util/api';
 
 const useStyles = makeStyles((theme) => ({
   columnAction: {
@@ -34,12 +34,8 @@ const ScheduledPage = () => {
   useEffectAsync(async () => {
     setLoading(true);
     try {
-      const response = await fetch(buildApiUrl('/reports'));
-      if (response.ok) {
-        setItems(await response.json());
-      } else {
-        throw Error(await response.text());
-      }
+      const items = await apiGet('/reports');
+      setItems(items);
     } finally {
       setLoading(false);
     }

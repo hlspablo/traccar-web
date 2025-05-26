@@ -32,7 +32,7 @@ import usePositionAttributes from '../attributes/usePositionAttributes';
 import { devicesActions } from '../../store';
 import { useCatch, useCatchCallback } from '../../reactHelper';
 import { useAttributePreference } from '../util/preferences';
-import { buildApiUrl } from '../../config/apiConfig';
+import { apiGet, apiPost } from '../util/api';
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -137,12 +137,8 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
 
   const handleRemove = useCatch(async (removed) => {
     if (removed) {
-      const response = await fetch(buildApiUrl('/devices'));
-      if (response.ok) {
-        dispatch(devicesActions.refresh(await response.json()));
-      } else {
-        throw Error(await response.text());
-      }
+      const devices = await apiGet('/devices');
+      dispatch(devicesActions.refresh(devices));
     }
     setRemoving(false);
   });
@@ -152,25 +148,9 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
       name: t('sharedGeofence'),
       area: `CIRCLE (${position.latitude} ${position.longitude}, 50)`,
     };
-    const response = await fetch(buildApiUrl('/geofences'), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newItem),
-    });
-    if (response.ok) {
-      const item = await response.json();
-      const permissionResponse = await fetch(buildApiUrl('/permissions'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ deviceId: position.deviceId, geofenceId: item.id }),
-      });
-      if (!permissionResponse.ok) {
-        throw Error(await permissionResponse.text());
-      }
-      navigate(`/settings/geofence/${item.id}`);
-    } else {
-      throw Error(await response.text());
-    }
+    const item = await apiPost('/geofences', newItem);
+    await apiPost('/permissions', { deviceId: position.deviceId, geofenceId: item.id });
+    navigate(`/settings/geofence/${item.id}`);
   }, [navigate, position]);
 
   return (

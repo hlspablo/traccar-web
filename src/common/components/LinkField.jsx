@@ -1,7 +1,7 @@
 import { Autocomplete, TextField } from '@mui/material';
 import React, { useState } from 'react';
-import { useEffectAsync } from '../../reactHelper';
-import { buildApiUrl } from '../../config/apiConfig';
+import { useEffectAsync, useCatchCallback } from '../../reactHelper';
+import { apiGet, apiPost, apiDelete } from '../util/api';
 
 const LinkField = ({
   label,
@@ -20,23 +20,15 @@ const LinkField = ({
 
   useEffectAsync(async () => {
     if (active) {
-      const response = await fetch(endpointAll);
-      if (response.ok) {
-        setItems(await response.json());
-      } else {
-        throw Error(await response.text());
-      }
+      const items = await apiGet(endpointAll);
+      setItems(items);
     }
   }, [active]);
 
   useEffectAsync(async () => {
     if (active) {
-      const response = await fetch(endpointLinked);
-      if (response.ok) {
-        setLinked(await response.json());
-      } else {
-        throw Error(await response.text());
-      }
+      const linked = await apiGet(endpointLinked);
+      setLinked(linked);
     }
   }, [active]);
 
@@ -47,29 +39,21 @@ const LinkField = ({
     return body;
   };
 
-  const onChange = async (value) => {
+  const onChange = useCatchCallback(async (value) => {
     const oldValue = linked.map((it) => keyGetter(it));
     const newValue = value.map((it) => keyGetter(it));
     if (!newValue.find((it) => it < 0)) {
       const results = [];
       newValue.filter((it) => !oldValue.includes(it)).forEach((added) => {
-        results.push(fetch(buildApiUrl('/permissions'), {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(createBody(added)),
-        }));
+        results.push(apiPost('/permissions', createBody(added)));
       });
       oldValue.filter((it) => !newValue.includes(it)).forEach((removed) => {
-        results.push(fetch(buildApiUrl('/permissions'), {
-          method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(createBody(removed)),
-        }));
+        results.push(apiDelete('/permissions', createBody(removed)));
       });
       await Promise.all(results);
       setLinked(value);
     }
-  };
+  }, [linked, keyGetter]);
 
   return (
     <Autocomplete

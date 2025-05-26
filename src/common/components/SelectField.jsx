@@ -3,6 +3,7 @@ import {
   FormControl, InputLabel, MenuItem, Select, Autocomplete, TextField,
 } from '@mui/material';
 import { useEffectAsync } from '../../reactHelper';
+import { apiGet } from '../util/api';
 
 const SelectField = ({
   label,
@@ -30,11 +31,13 @@ const SelectField = ({
 
   useEffectAsync(async () => {
     if (endpoint) {
-      const response = await fetch(endpoint);
-      if (response.ok) {
-        setItems(await response.json());
-      } else {
-        throw Error(await response.text());
+      try {
+        const items = await apiGet(endpoint);
+        setItems(items);
+      } catch (error) {
+        console.error('Failed to load select field data:', error);
+        // Could set items to empty array or show error state
+        setItems([]);
       }
     }
   }, []);

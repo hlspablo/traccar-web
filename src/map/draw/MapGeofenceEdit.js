@@ -13,7 +13,9 @@ import { errorsActions, geofencesActions } from '../../store';
 import { useCatchCallback } from '../../reactHelper';
 import theme from './theme';
 import { useTranslation } from '../../common/components/LocalizationProvider';
-import { buildApiUrl } from '../../config/apiConfig';
+import {
+  apiGet, apiPost, apiPut, apiDelete,
+} from '../../common/util/api';
 
 MapboxDraw.constants.classes.CONTROL_BASE = 'maplibregl-ctrl';
 MapboxDraw.constants.classes.CONTROL_PREFIX = 'maplibregl-ctrl-';
@@ -51,12 +53,8 @@ const MapGeofenceEdit = ({ selectedGeofenceId }) => {
   const geofences = useSelector((state) => state.geofences.items);
 
   const refreshGeofences = useCatchCallback(async () => {
-    const response = await fetch(buildApiUrl('/geofences'));
-    if (response.ok) {
-      dispatch(geofencesActions.refresh(await response.json()));
-    } else {
-      throw Error(await response.text());
-    }
+    const geofences = await apiGet('/geofences');
+    dispatch(geofencesActions.refresh(geofences));
   }, [dispatch]);
 
   useEffect(() => {
@@ -72,17 +70,8 @@ const MapGeofenceEdit = ({ selectedGeofenceId }) => {
       const newItem = { name: t('sharedGeofence'), area: geometryToArea(feature.geometry) };
       draw.delete(feature.id);
       try {
-        const response = await fetch(buildApiUrl('/geofences'), {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newItem),
-        });
-        if (response.ok) {
-          const item = await response.json();
-          navigate(`/settings/geofence/${item.id}`);
-        } else {
-          throw Error(await response.text());
-        }
+        const item = await apiPost('/geofences', newItem);
+        navigate(`/settings/geofence/${item.id}`);
       } catch (error) {
         dispatch(errorsActions.push(error.message));
       }
@@ -96,12 +85,8 @@ const MapGeofenceEdit = ({ selectedGeofenceId }) => {
     const listener = async (event) => {
       const feature = event.features[0];
       try {
-        const response = await fetch(buildApiUrl(`/geofences/${feature.id}`), { method: 'DELETE' });
-        if (response.ok) {
-          refreshGeofences();
-        } else {
-          throw Error(await response.text());
-        }
+        await apiDelete(`/geofences/${feature.id}`);
+        refreshGeofences();
       } catch (error) {
         dispatch(errorsActions.push(error.message));
       }
@@ -118,16 +103,8 @@ const MapGeofenceEdit = ({ selectedGeofenceId }) => {
       if (item) {
         const updatedItem = { ...item, area: geometryToArea(feature.geometry) };
         try {
-          const response = await fetch(buildApiUrl(`/geofences/${feature.id}`), {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(updatedItem),
-          });
-          if (response.ok) {
-            refreshGeofences();
-          } else {
-            throw Error(await response.text());
-          }
+          await apiPut(`/geofences/${feature.id}`, updatedItem);
+          refreshGeofences();
         } catch (error) {
           dispatch(errorsActions.push(error.message));
         }

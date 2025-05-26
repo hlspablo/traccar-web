@@ -4,6 +4,8 @@ import {
   Typography, Box, Chip,
 } from '@mui/material';
 import { useTranslation } from './LocalizationProvider';
+import { useEffectAsync } from '../../reactHelper';
+import { apiGet } from '../util/api';
 
 const SelectDeviceField = ({ onChange, value, label, required, userId }) => {
   const t = useTranslation();
@@ -12,41 +14,29 @@ const SelectDeviceField = ({ onChange, value, label, required, userId }) => {
   const [inputValue, setInputValue] = useState('');
   const [selectedDevices, setSelectedDevices] = useState([]);
 
-  // Fetch devices when userId changes
-  useEffect(() => {
-    const fetchDevices = async () => {
-      if (!userId) {
-        setDevices([]);
-        setSelectedDevices([]);
-        return;
-      }
-
+  useEffectAsync(async () => {
+    if (userId) {
       setLoading(true);
       try {
-        const response = await fetch(`/api/devices?userId=${userId}`);
-        if (response.ok) {
-          const data = await response.json();
-          setDevices(data);
-
-          // Set selected devices if value exists
-          if (Array.isArray(value) && value.length > 0) {
-            const selected = data.filter((device) => value.includes(device.id));
-            setSelectedDevices(selected);
-          } else {
-            setSelectedDevices([]);
-          }
-        } else {
-          throw Error(await response.text());
-        }
-      } catch (error) {
-        console.error('Error fetching devices:', error);
+        const devices = await apiGet(`/devices?userId=${userId}`);
+        setDevices(devices);
       } finally {
         setLoading(false);
       }
-    };
+    } else {
+      setDevices([]);
+      setSelectedDevices([]);
+    }
+  }, [userId]);
 
-    fetchDevices();
-  }, [userId, value]);
+  useEffect(() => {
+    if (Array.isArray(value) && value.length > 0 && devices.length > 0) {
+      const selected = devices.filter((device) => value.includes(device.id));
+      setSelectedDevices(selected);
+    } else {
+      setSelectedDevices([]);
+    }
+  }, [value, devices]);
 
   const handleChange = (event, newValue) => {
     setSelectedDevices(newValue);

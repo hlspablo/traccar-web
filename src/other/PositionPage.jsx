@@ -11,6 +11,7 @@ import { useEffectAsync } from '../reactHelper';
 import { useTranslation } from '../common/components/LocalizationProvider';
 import PositionValue from '../common/components/PositionValue';
 import usePositionAttributes from '../common/attributes/usePositionAttributes';
+import { apiGet } from '../common/util/api';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -38,14 +39,9 @@ const PositionPage = () => {
 
   useEffectAsync(async () => {
     if (id) {
-      const response = await fetch(`/api/positions?id=${id}`);
-      if (response.ok) {
-        const positions = await response.json();
-        if (positions.length > 0) {
-          setItem(positions[0]);
-        }
-      } else {
-        throw Error(await response.text());
+      const response = await apiGet(`/positions?id=${id}`);
+      if (response.length > 0) {
+        setItem(response[0]);
       }
     }
   }, [id]);

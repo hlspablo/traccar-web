@@ -4,7 +4,7 @@ import {
   Typography, Box,
 } from '@mui/material';
 import { useTranslation } from './LocalizationProvider';
-import { buildApiUrl } from '../../config/apiConfig';
+import { apiGet } from '../util/api';
 
 const SelectUserField = ({ onChange, value, label, required }) => {
   const t = useTranslation();
@@ -17,18 +17,13 @@ const SelectUserField = ({ onChange, value, label, required }) => {
     const fetchUsers = async () => {
       setLoading(true);
       try {
-        const response = await fetch(buildApiUrl('/users?all=true'));
-        if (response.ok) {
-          const data = await response.json();
-          setUsers(data);
+        const data = await apiGet('/users?all=true');
+        setUsers(data);
 
-          // Set selected user if value exists
-          if (value) {
-            const found = data.find((user) => user.id === value);
-            setSelectedUser(found || null);
-          }
-        } else {
-          throw Error(await response.text());
+        // Set selected user if value exists
+        if (value) {
+          const found = data.find((user) => user.id === value);
+          setSelectedUser(found || null);
         }
       } finally {
         setLoading(false);

@@ -8,7 +8,7 @@ import {
 import { geofencesActions } from '../store';
 import CollectionActions from '../settings/components/CollectionActions';
 import { useCatchCallback } from '../reactHelper';
-import { buildApiUrl } from '../config/apiConfig';
+import { apiGet } from '../common/util/api';
 
 const useStyles = makeStyles(() => ({
   list: {
@@ -29,12 +29,8 @@ const GeofencesList = ({ onGeofenceSelected }) => {
   const items = useSelector((state) => state.geofences.items);
 
   const refreshGeofences = useCatchCallback(async () => {
-    const response = await fetch(buildApiUrl('/geofences'));
-    if (response.ok) {
-      dispatch(geofencesActions.refresh(await response.json()));
-    } else {
-      throw Error(await response.text());
-    }
+    const geofences = await apiGet('/geofences');
+    dispatch(geofencesActions.refresh(geofences));
   }, [dispatch]);
 
   return (

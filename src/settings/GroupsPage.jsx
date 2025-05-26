@@ -15,7 +15,7 @@ import TableShimmer from '../common/components/TableShimmer';
 import SearchHeader, { filterByKeyword } from './components/SearchHeader';
 import { useRestriction } from '../common/util/permissions';
 import useSettingsStyles from './common/useSettingsStyles';
-import { buildApiUrl } from '../config/apiConfig';
+import { apiGet } from '../common/util/api';
 
 const GroupsPage = () => {
   const classes = useSettingsStyles();
@@ -32,12 +32,8 @@ const GroupsPage = () => {
   useEffectAsync(async () => {
     setLoading(true);
     try {
-      const response = await fetch(buildApiUrl('/groups'));
-      if (response.ok) {
-        setItems(await response.json());
-      } else {
-        throw Error(await response.text());
-      }
+      const items = await apiGet('/groups');
+      setItems(items);
     } finally {
       setLoading(false);
     }

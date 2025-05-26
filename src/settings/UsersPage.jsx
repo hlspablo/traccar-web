@@ -17,7 +17,7 @@ import TableShimmer from '../common/components/TableShimmer';
 import { useManager } from '../common/util/permissions';
 import SearchHeader, { filterByKeyword } from './components/SearchHeader';
 import useSettingsStyles from './common/useSettingsStyles';
-import { buildApiUrl } from '../config/apiConfig';
+import { apiGet } from '../common/util/api';
 
 const UsersPage = () => {
   const classes = useSettingsStyles();
@@ -65,12 +65,8 @@ const UsersPage = () => {
   useEffectAsync(async () => {
     setLoading(true);
     try {
-      const response = await fetch(buildApiUrl('/users'));
-      if (response.ok) {
-        setItems(await response.json());
-      } else {
-        throw Error(await response.text());
-      }
+      const items = await apiGet('/users');
+      setItems(items);
     } finally {
       setLoading(false);
     }

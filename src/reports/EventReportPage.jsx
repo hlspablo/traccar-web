@@ -24,7 +24,7 @@ import MapPositions from '../map/MapPositions';
 import MapCamera from '../map/MapCamera';
 import scheduleReport from './common/scheduleReport';
 import MapScale from '../map/MapScale';
-import { buildApiUrl } from '../config/apiConfig';
+import { apiGet } from '../common/util/api';
 
 const columnsArray = [
   ['eventTime', 'positionFixTime'],
@@ -55,15 +55,10 @@ const EventReportPage = () => {
   const [position, setPosition] = useState(null);
 
   useEffectAsync(async () => {
-    if (selectedItem) {
-      const response = await fetch(`/api/positions?id=${selectedItem.positionId}`);
-      if (response.ok) {
-        const positions = await response.json();
-        if (positions.length > 0) {
-          setPosition(positions[0]);
-        }
-      } else {
-        throw Error(await response.text());
+    if (selectedItem && selectedItem.positionId) {
+      const positionResponse = await apiGet(`/positions?id=${selectedItem.positionId}`);
+      if (positionResponse.length > 0) {
+        setPosition(positionResponse[0]);
       }
     } else {
       setPosition(null);
@@ -71,14 +66,11 @@ const EventReportPage = () => {
   }, [selectedItem]);
 
   useEffectAsync(async () => {
-    const response = await fetch(buildApiUrl('/notifications/types'));
-    if (response.ok) {
-      const types = await response.json();
-      setAllEventTypes([...allEventTypes, ...types.map((it) => [it.type, prefixString('event', it.type)])]);
-    } else {
-      throw Error(await response.text());
+    if (selectedItem) {
+      const typesData = await apiGet('/notifications/types');
+      setAllEventTypes([...allEventTypes, ...typesData.map((it) => [it.type, prefixString('event', it.type)])]);
     }
-  }, []);
+  }, [selectedItem]);
 
   const handleSubmit = useCatch(async ({ deviceId, from, to, type }) => {
     const query = new URLSearchParams({ deviceId, from, to });
@@ -86,21 +78,12 @@ const EventReportPage = () => {
     if (type === 'export') {
       window.location.assign(`/api/reports/events/xlsx?${query.toString()}`);
     } else if (type === 'mail') {
-      const response = await fetch(`/api/reports/events/mail?${query.toString()}`);
-      if (!response.ok) {
-        throw Error(await response.text());
-      }
+      await apiGet(`/reports/events/mail?${query.toString()}`);
     } else {
       setLoading(true);
       try {
-        const response = await fetch(`/api/reports/events?${query.toString()}`, {
-          headers: { Accept: 'application/json' },
-        });
-        if (response.ok) {
-          setItems(await response.json());
-        } else {
-          throw Error(await response.text());
-        }
+        const items = await apiGet(`/reports/events?${query.toString()}`);
+        setItems(items);
       } finally {
         setLoading(false);
       }

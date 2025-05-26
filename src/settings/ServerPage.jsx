@@ -33,8 +33,7 @@ import useServerAttributes from '../common/attributes/useServerAttributes';
 import useMapStyles from '../map/core/useMapStyles';
 import { map } from '../map/core/MapView';
 import useSettingsStyles from './common/useSettingsStyles';
-import { buildApiUrl } from '../config/apiConfig';
-import { apiPost } from '../common/util/api';
+import { apiPost, apiPut } from '../common/util/api';
 
 const ServerPage = () => {
   const classes = useSettingsStyles();
@@ -58,18 +57,9 @@ const ServerPage = () => {
   });
 
   const handleSave = useCatch(async () => {
-    const response = await fetch(buildApiUrl('/server'), {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(item),
-    });
-
-    if (response.ok) {
-      dispatch(sessionActions.updateServer(await response.json()));
-      navigate(-1);
-    } else {
-      throw Error(await response.text());
-    }
+    const updatedServer = await apiPut('/server', item);
+    dispatch(sessionActions.updateServer(updatedServer));
+    navigate(-1);
   });
 
   return (

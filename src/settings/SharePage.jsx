@@ -17,7 +17,7 @@ import PageLayout from '../common/components/PageLayout';
 import SettingsMenu from './components/SettingsMenu';
 import { useCatchCallback } from '../reactHelper';
 import useSettingsStyles from './common/useSettingsStyles';
-import { buildApiUrl } from '../config/apiConfig';
+import { apiPost } from '../common/util/api';
 
 const SharePage = () => {
   const navigate = useNavigate();
@@ -33,16 +33,8 @@ const SharePage = () => {
 
   const handleShare = useCatchCallback(async () => {
     const expirationTime = dayjs(expiration).toISOString();
-    const response = await fetch(buildApiUrl('/devices/share'), {
-      method: 'POST',
-      body: new URLSearchParams(`deviceId=${id}&expiration=${expirationTime}`),
-    });
-    if (response.ok) {
-      const token = await response.text();
-      setLink(`${window.location.origin}?token=${token}`);
-    } else {
-      throw Error(await response.text());
-    }
+    const token = await apiPost('/devices/share', new URLSearchParams(`deviceId=${id}&expiration=${expirationTime}`));
+    setLink(`${window.location.origin}?token=${token}`);
   }, [id, expiration, setLink]);
 
   return (

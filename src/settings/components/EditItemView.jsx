@@ -7,6 +7,9 @@ import { useCatch, useEffectAsync } from '../../reactHelper';
 import { useTranslation } from '../../common/components/LocalizationProvider';
 import PageLayout from '../../common/components/PageLayout';
 import useSettingsStyles from '../common/useSettingsStyles';
+import {
+  apiGet, apiPost, apiPut,
+} from '../../common/util/api';
 
 const EditItemView = ({
   children, endpoint, item, setItem, defaultItem, validate, onItemSaved, menu, breadcrumbs,
@@ -20,12 +23,8 @@ const EditItemView = ({
   useEffectAsync(async () => {
     if (!item) {
       if (id) {
-        const response = await fetch(`/${endpoint}/${id}`);
-        if (response.ok) {
-          setItem(await response.json());
-        } else {
-          throw Error(await response.text());
-        }
+        const item = await apiGet(`/${endpoint}/${id}`);
+        setItem(item);
       } else {
         setItem(defaultItem || {});
       }
@@ -33,25 +32,17 @@ const EditItemView = ({
   }, [id, item, defaultItem]);
 
   const handleSave = useCatch(async () => {
-    let url = `/${endpoint}`;
+    let updatedItem;
     if (id) {
-      url += `/${id}`;
-    }
-
-    const response = await fetch(url, {
-      method: !id ? 'POST' : 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(item),
-    });
-
-    if (response.ok) {
-      if (onItemSaved) {
-        onItemSaved(await response.json());
-      }
-      navigate(-1);
+      updatedItem = await apiPut(`/${endpoint}/${id}`, item);
     } else {
-      throw Error(await response.text());
+      updatedItem = await apiPost(`/${endpoint}`, item);
     }
+
+    if (onItemSaved) {
+      onItemSaved(updatedItem);
+    }
+    navigate(-1);
   });
 
   return (

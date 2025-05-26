@@ -11,7 +11,7 @@ import { useTranslation } from '../common/components/LocalizationProvider';
 import { snackBarDurationShortMs } from '../common/util/duration';
 import { useCatch, useEffectAsync } from '../reactHelper';
 import { sessionActions } from '../store';
-import { buildApiUrl } from '../config/apiConfig';
+import { apiPost } from '../common/util/api';
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -48,26 +48,25 @@ const RegisterPage = () => {
 
   useEffectAsync(async () => {
     if (totpForce) {
-      const response = await fetch(buildApiUrl('/users/totp'), { method: 'POST' });
-      if (response.ok) {
-        setTotpKey(await response.text());
-      } else {
-        throw Error(await response.text());
-      }
+      const totpKey = await apiPost('/users/totp');
+      setTotpKey(totpKey);
     }
-  }, [totpForce, setTotpKey]);
+  }, [totpForce]);
 
   const handleSubmit = useCatch(async (event) => {
     event.preventDefault();
-    const response = await fetch(buildApiUrl('/users'), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password, totpKey }),
+    const user = await apiPost('/users', {
+      name,
+      email,
+      password,
+      totpKey,
     });
-    if (response.ok) {
+
+    if (server.newServer) {
       setSnackbarOpen(true);
     } else {
-      throw Error(await response.text());
+      dispatch(sessionActions.updateUser(user));
+      navigate('/');
     }
   });
 

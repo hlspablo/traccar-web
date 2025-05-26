@@ -32,7 +32,7 @@ import usePositionAttributes from '../attributes/usePositionAttributes';
 import { devicesActions } from '../../store';
 import { useCatch, useCatchCallback } from '../../reactHelper';
 import { useAttributePreference } from '../util/preferences';
-import { buildApiUrl } from '../config/apiConfig';
+import { buildApiUrl } from '../../config/apiConfig';
 
 const useStyles = makeStyles((theme) => ({
   card: {

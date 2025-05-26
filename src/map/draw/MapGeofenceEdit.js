@@ -72,7 +72,7 @@ const MapGeofenceEdit = ({ selectedGeofenceId }) => {
       const newItem = { name: t('sharedGeofence'), area: geometryToArea(feature.geometry) };
       draw.delete(feature.id);
       try {
-        const response = await fetch('/api/geofences', {
+        const response = await fetch(buildApiUrl('/geofences'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(newItem),
@@ -96,7 +96,7 @@ const MapGeofenceEdit = ({ selectedGeofenceId }) => {
     const listener = async (event) => {
       const feature = event.features[0];
       try {
-        const response = await fetch(`/api/geofences/${feature.id}`, { method: 'DELETE' });
+        const response = await fetch(buildApiUrl(`/geofences/${feature.id}`), { method: 'DELETE' });
         if (response.ok) {
           refreshGeofences();
         } else {
@@ -118,7 +118,7 @@ const MapGeofenceEdit = ({ selectedGeofenceId }) => {
       if (item) {
         const updatedItem = { ...item, area: geometryToArea(feature.geometry) };
         try {
-          const response = await fetch(`/api/geofences/${feature.id}`, {
+          const response = await fetch(buildApiUrl(`/geofences/${feature.id}`), {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(updatedItem),

@@ -20,6 +20,7 @@ import { useCatch } from '../reactHelper';
 import { sessionActions } from '../store';
 import { useAdministrator, useRestriction } from '../common/util/permissions';
 import useSettingsStyles from './common/useSettingsStyles';
+import { buildApiUrl } from '../config/apiConfig';
 
 const deviceFields = [
   { id: 'name', name: 'sharedName' },
@@ -57,7 +58,7 @@ const PreferencesPage = () => {
 
   const generateToken = useCatch(async () => {
     const expiration = dayjs(tokenExpiration, 'YYYY-MM-DD').toISOString();
-    const response = await fetch('/api/session/token', {
+    const response = await fetch(buildApiUrl('/session/token'), {
       method: 'POST',
       body: new URLSearchParams(`expiration=${expiration}`),
     });

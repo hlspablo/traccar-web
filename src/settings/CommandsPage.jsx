@@ -14,6 +14,7 @@ import TableShimmer from '../common/components/TableShimmer';
 import SearchHeader, { filterByKeyword } from './components/SearchHeader';
 import { useRestriction } from '../common/util/permissions';
 import useSettingsStyles from './common/useSettingsStyles';
+import { buildApiUrl } from '../config/apiConfig';
 
 const CommandsPage = () => {
   const classes = useSettingsStyles();
@@ -28,7 +29,7 @@ const CommandsPage = () => {
   useEffectAsync(async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/commands');
+      const response = await fetch(buildApiUrl('/commands'));
       if (response.ok) {
         setItems(await response.json());
       } else {

@@ -37,6 +37,7 @@ import { useCatch } from '../reactHelper';
 import useMapStyles from '../map/core/useMapStyles';
 import { map } from '../map/core/MapView';
 import useSettingsStyles from './common/useSettingsStyles';
+import { buildApiUrl } from '../config/apiConfig';
 
 const UserPage = () => {
   const classes = useSettingsStyles();
@@ -80,7 +81,7 @@ const UserPage = () => {
   });
 
   const handleGenerateTotp = useCatch(async () => {
-    const response = await fetch('/api/users/totp', { method: 'POST' });
+    const response = await fetch(buildApiUrl('/users/totp'), { method: 'POST' });
     if (response.ok) {
       setItem({ ...item, totpKey: await response.text() });
     } else {

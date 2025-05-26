@@ -1,6 +1,7 @@
 import { Autocomplete, TextField } from '@mui/material';
 import React, { useState } from 'react';
 import { useEffectAsync } from '../../reactHelper';
+import { buildApiUrl } from '../config/apiConfig';
 
 const LinkField = ({
   label,
@@ -52,7 +53,7 @@ const LinkField = ({
     if (!newValue.find((it) => it < 0)) {
       const results = [];
       newValue.filter((it) => !oldValue.includes(it)).forEach((added) => {
-        results.push(fetch('/api/permissions', {
+        results.push(fetch(buildApiUrl('/permissions'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(createBody(added)),

@@ -10,6 +10,7 @@ import { useTranslation } from '../common/components/LocalizationProvider';
 import useQuery from '../common/util/useQuery';
 import { snackBarDurationShortMs } from '../common/util/duration';
 import { useCatch } from '../reactHelper';
+import { buildApiUrl } from '../config/apiConfig';
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -45,7 +46,7 @@ const ResetPasswordPage = () => {
     event.preventDefault();
     let response;
     if (!token) {
-      response = await fetch('/api/password/reset', {
+      response = await fetch(buildApiUrl('/password/reset'), {
         method: 'POST',
         body: new URLSearchParams(`email=${encodeURIComponent(email)}`),
       });

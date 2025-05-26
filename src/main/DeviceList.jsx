@@ -6,6 +6,7 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 import { devicesActions } from '../store';
 import { useEffectAsync } from '../reactHelper';
 import DeviceRow from './DeviceRow';
+import { buildApiUrl } from '../config/apiConfig';
 
 const useStyles = makeStyles((theme) => ({
   list: {
@@ -36,7 +37,7 @@ const DeviceList = ({ devices }) => {
   }, []);
 
   useEffectAsync(async () => {
-    const response = await fetch('/api/devices');
+    const response = await fetch(buildApiUrl('/devices'));
     if (response.ok) {
       dispatch(devicesActions.refresh(await response.json()));
     } else {

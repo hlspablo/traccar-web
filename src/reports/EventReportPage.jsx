@@ -24,6 +24,7 @@ import MapPositions from '../map/MapPositions';
 import MapCamera from '../map/MapCamera';
 import scheduleReport from './common/scheduleReport';
 import MapScale from '../map/MapScale';
+import { buildApiUrl } from '../config/apiConfig';
 
 const columnsArray = [
   ['eventTime', 'positionFixTime'],
@@ -70,7 +71,7 @@ const EventReportPage = () => {
   }, [selectedItem]);
 
   useEffectAsync(async () => {
-    const response = await fetch('/api/notifications/types');
+    const response = await fetch(buildApiUrl('/notifications/types'));
     if (response.ok) {
       const types = await response.json();
       setAllEventTypes([...allEventTypes, ...types.map((it) => [it.type, prefixString('event', it.type)])]);

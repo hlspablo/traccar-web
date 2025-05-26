@@ -4,6 +4,7 @@ import {
   geofencesActions, groupsActions, driversActions, maintenancesActions, calendarsActions,
 } from './store';
 import { useEffectAsync } from './reactHelper';
+import { buildApiUrl } from './config/apiConfig';
 
 const CachingController = () => {
   const authenticated = useSelector((state) => !!state.session.user);
@@ -11,7 +12,7 @@ const CachingController = () => {
 
   useEffectAsync(async () => {
     if (authenticated) {
-      const response = await fetch('/api/geofences');
+      const response = await fetch(buildApiUrl('/geofences'));
       if (response.ok) {
         dispatch(geofencesActions.refresh(await response.json()));
       } else {
@@ -22,7 +23,7 @@ const CachingController = () => {
 
   useEffectAsync(async () => {
     if (authenticated) {
-      const response = await fetch('/api/groups');
+      const response = await fetch(buildApiUrl('/groups'));
       if (response.ok) {
         dispatch(groupsActions.refresh(await response.json()));
       } else {
@@ -33,7 +34,7 @@ const CachingController = () => {
 
   useEffectAsync(async () => {
     if (authenticated) {
-      const response = await fetch('/api/drivers');
+      const response = await fetch(buildApiUrl('/drivers'));
       if (response.ok) {
         dispatch(driversActions.refresh(await response.json()));
       } else {
@@ -44,7 +45,7 @@ const CachingController = () => {
 
   useEffectAsync(async () => {
     if (authenticated) {
-      const response = await fetch('/api/maintenance');
+      const response = await fetch(buildApiUrl('/maintenance'));
       if (response.ok) {
         dispatch(maintenancesActions.refresh(await response.json()));
       } else {
@@ -55,7 +56,7 @@ const CachingController = () => {
 
   useEffectAsync(async () => {
     if (authenticated) {
-      const response = await fetch('/api/calendars');
+      const response = await fetch(buildApiUrl('/calendars'));
       if (response.ok) {
         dispatch(calendarsActions.refresh(await response.json()));
       } else {

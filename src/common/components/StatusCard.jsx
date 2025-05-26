@@ -32,6 +32,7 @@ import usePositionAttributes from '../attributes/usePositionAttributes';
 import { devicesActions } from '../../store';
 import { useCatch, useCatchCallback } from '../../reactHelper';
 import { useAttributePreference } from '../util/preferences';
+import { buildApiUrl } from '../config/apiConfig';
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -136,7 +137,7 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
 
   const handleRemove = useCatch(async (removed) => {
     if (removed) {
-      const response = await fetch('/api/devices');
+      const response = await fetch(buildApiUrl('/devices'));
       if (response.ok) {
         dispatch(devicesActions.refresh(await response.json()));
       } else {

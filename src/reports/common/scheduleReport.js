@@ -1,5 +1,5 @@
 export default async (deviceIds, groupIds, report) => {
-  const response = await fetch('/api/reports', {
+  const response = await fetch(buildApiUrl('/reports'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(report),

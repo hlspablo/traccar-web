@@ -18,6 +18,7 @@ import { handleLoginTokenListeners, nativeEnvironment, nativePostMessage } from 
 import LogoImage from './LogoImage';
 import { useCatch } from '../reactHelper';
 import Loader from '../common/components/Loader';
+import { buildApiUrl } from '../config/apiConfig';
 
 const useStyles = makeStyles((theme) => ({
   options: {
@@ -80,7 +81,7 @@ const LoginPage = () => {
       let token = '';
       try {
         const expiration = dayjs().add(6, 'months').toISOString();
-        const response = await fetch('/api/session/token', {
+        const response = await fetch(buildApiUrl('/session/token'), {
           method: 'POST',
           body: new URLSearchParams(`expiration=${expiration}`),
         });
@@ -94,12 +95,25 @@ const LoginPage = () => {
     }
   };
 
-  const handlePasswordLogin = async (event) => {
+  const handleTokenLogin = useCatch(async (token) => {
+    const response = await fetch(buildApiUrl('/session/token'), {
+      method: 'POST',
+      body: new URLSearchParams(`token=${encodeURIComponent(token)}`),
+    });
+    if (response.ok) {
+      dispatch(sessionActions.updateUser(await response.json()));
+      navigate('/');
+    } else {
+      throw Error(await response.text());
+    }
+  });
+
+  const handleLogin = useCatch(async (event) => {
     event.preventDefault();
     setFailed(false);
     try {
       const query = `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
-      const response = await fetch('/api/session', {
+      const response = await fetch(buildApiUrl('/session'), {
         method: 'POST',
         body: new URLSearchParams(code.length ? `${query}&code=${code}` : query),
       });
@@ -117,21 +131,10 @@ const LoginPage = () => {
       setFailed(true);
       setPassword('');
     }
-  };
-
-  const handleTokenLogin = useCatch(async (token) => {
-    const response = await fetch(`/api/session?token=${encodeURIComponent(token)}`);
-    if (response.ok) {
-      const user = await response.json();
-      dispatch(sessionActions.updateUser(user));
-      navigate('/');
-    } else {
-      throw Error(await response.text());
-    }
   });
 
   const handleOpenIdLogin = () => {
-    document.location = '/api/session/openid/auth';
+    document.location = buildApiUrl('/session/openid/auth');
   };
 
   useEffect(() => nativePostMessage('authentication'), []);
@@ -208,7 +211,7 @@ const LoginPage = () => {
           />
         )}
         <Button
-          onClick={handlePasswordLogin}
+          onClick={handleLogin}
           type="submit"
           variant="contained"
           color="secondary"

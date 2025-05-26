@@ -16,6 +16,7 @@ import useGroupAttributes from '../common/attributes/useGroupAttributes';
 import { useCatch } from '../reactHelper';
 import { groupsActions } from '../store';
 import useSettingsStyles from './common/useSettingsStyles';
+import { buildApiUrl } from '../config/apiConfig';
 
 const GroupPage = () => {
   const classes = useSettingsStyles();
@@ -28,7 +29,7 @@ const GroupPage = () => {
   const [item, setItem] = useState();
 
   const onItemSaved = useCatch(async () => {
-    const response = await fetch('/api/groups');
+    const response = await fetch(buildApiUrl('/groups'));
     if (response.ok) {
       dispatch(groupsActions.refresh(await response.json()));
     } else {

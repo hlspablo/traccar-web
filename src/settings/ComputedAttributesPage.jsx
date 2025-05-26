@@ -12,6 +12,7 @@ import CollectionActions from './components/CollectionActions';
 import TableShimmer from '../common/components/TableShimmer';
 import SearchHeader, { filterByKeyword } from './components/SearchHeader';
 import useSettingsStyles from './common/useSettingsStyles';
+import { buildApiUrl } from '../config/apiConfig';
 
 const ComputedAttributesPage = () => {
   const classes = useSettingsStyles();
@@ -26,7 +27,7 @@ const ComputedAttributesPage = () => {
   useEffectAsync(async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/attributes/computed');
+      const response = await fetch(buildApiUrl('/attributes/computed'));
       if (response.ok) {
         setItems(await response.json());
       } else {

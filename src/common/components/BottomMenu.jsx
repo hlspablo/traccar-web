@@ -15,6 +15,8 @@ import { sessionActions } from '../../store';
 import { useTranslation } from './LocalizationProvider';
 import { useRestriction } from '../util/permissions';
 import { nativePostMessage } from './NativeInterface';
+import { buildApiUrl } from '../../config/apiConfig';
+import { useCatch } from '../../reactHelper';
 
 const BottomMenu = () => {
   const navigate = useNavigate();
@@ -47,7 +49,7 @@ const BottomMenu = () => {
     navigate(`/settings/user/${user.id}`);
   };
 
-  const handleLogout = async () => {
+  const handleLogout = useCatch(async () => {
     setAnchorEl(null);
 
     const notificationToken = window.localStorage.getItem('notificationToken');
@@ -62,7 +64,7 @@ const BottomMenu = () => {
             notificationTokens: tokens.length > 1 ? tokens.filter((it) => it !== notificationToken).join(',') : undefined,
           },
         };
-        await fetch(`/api/users/${user.id}`, {
+        await fetch(buildApiUrl(`/users/${user.id}`), {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(updatedUser),
@@ -70,11 +72,11 @@ const BottomMenu = () => {
       }
     }
 
-    await fetch('/api/session', { method: 'DELETE' });
+    await fetch(buildApiUrl('/session'), { method: 'DELETE' });
     nativePostMessage('logout');
     navigate('/login');
     dispatch(sessionActions.updateUser(null));
-  };
+  });
 
   const handleSelection = (event, value) => {
     switch (value) {

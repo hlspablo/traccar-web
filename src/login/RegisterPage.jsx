@@ -11,6 +11,7 @@ import { useTranslation } from '../common/components/LocalizationProvider';
 import { snackBarDurationShortMs } from '../common/util/duration';
 import { useCatch, useEffectAsync } from '../reactHelper';
 import { sessionActions } from '../store';
+import { buildApiUrl } from '../config/apiConfig';
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -47,7 +48,7 @@ const RegisterPage = () => {
 
   useEffectAsync(async () => {
     if (totpForce) {
-      const response = await fetch('/api/users/totp', { method: 'POST' });
+      const response = await fetch(buildApiUrl('/users/totp'), { method: 'POST' });
       if (response.ok) {
         setTotpKey(await response.text());
       } else {
@@ -58,7 +59,7 @@ const RegisterPage = () => {
 
   const handleSubmit = useCatch(async (event) => {
     event.preventDefault();
-    const response = await fetch('/api/users', {
+    const response = await fetch(buildApiUrl('/users'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email, password, totpKey }),

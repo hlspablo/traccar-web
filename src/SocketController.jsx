@@ -89,7 +89,7 @@ const SocketController = () => {
 
   useEffectAsync(async () => {
     if (authenticated) {
-      const response = await fetch('/api/devices');
+      const response = await fetch(buildApiUrl('/devices'));
       if (response.ok) {
         dispatch(devicesActions.refresh(await response.json()));
       } else {

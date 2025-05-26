@@ -18,6 +18,7 @@ import { useTranslation } from '../common/components/LocalizationProvider';
 import MapGeocoder from '../map/geocoder/MapGeocoder';
 import { errorsActions } from '../store';
 import MapScale from '../map/MapScale';
+import { buildApiUrl } from '../config/apiConfig';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -79,7 +80,7 @@ const GeofencesPage = () => {
       const area = `LINESTRING (${coordinates})`;
       const newItem = { name: t('sharedGeofence'), area };
       try {
-        const response = await fetch('/api/geofences', {
+        const response = await fetch(buildApiUrl('/geofences'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(newItem),

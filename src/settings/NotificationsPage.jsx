@@ -13,6 +13,7 @@ import CollectionActions from './components/CollectionActions';
 import TableShimmer from '../common/components/TableShimmer';
 import SearchHeader, { filterByKeyword } from './components/SearchHeader';
 import useSettingsStyles from './common/useSettingsStyles';
+import { buildApiUrl } from '../config/apiConfig';
 
 const NotificationsPage = () => {
   const classes = useSettingsStyles();
@@ -26,7 +27,7 @@ const NotificationsPage = () => {
   useEffectAsync(async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/notifications');
+      const response = await fetch(buildApiUrl('/notifications'));
       if (response.ok) {
         setItems(await response.json());
       } else {

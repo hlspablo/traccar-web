@@ -13,6 +13,7 @@ import { errorsActions, geofencesActions } from '../../store';
 import { useCatchCallback } from '../../reactHelper';
 import theme from './theme';
 import { useTranslation } from '../../common/components/LocalizationProvider';
+import { buildApiUrl } from '../../config/apiConfig';
 
 MapboxDraw.constants.classes.CONTROL_BASE = 'maplibregl-ctrl';
 MapboxDraw.constants.classes.CONTROL_PREFIX = 'maplibregl-ctrl-';
@@ -50,7 +51,7 @@ const MapGeofenceEdit = ({ selectedGeofenceId }) => {
   const geofences = useSelector((state) => state.geofences.items);
 
   const refreshGeofences = useCatchCallback(async () => {
-    const response = await fetch('/api/geofences');
+    const response = await fetch(buildApiUrl('/geofences'));
     if (response.ok) {
       dispatch(geofencesActions.refresh(await response.json()));
     } else {

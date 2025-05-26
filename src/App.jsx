@@ -11,6 +11,7 @@ import { sessionActions } from './store';
 import UpdateController from './UpdateController';
 import TermsDialog from './common/components/TermsDialog';
 import Loader from './common/components/Loader';
+import { buildApiUrl } from './config/apiConfig';
 
 const useStyles = makeStyles(() => ({
   page: {
@@ -35,7 +36,7 @@ const App = () => {
   const user = useSelector((state) => state.session.user);
 
   const acceptTerms = useCatch(async () => {
-    const response = await fetch(`/api/users/${user.id}`, {
+    const response = await fetch(buildApiUrl(`/users/${user.id}`), {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...user, attributes: { ...user.attributes, termsAccepted: true } }),
@@ -49,7 +50,7 @@ const App = () => {
 
   useEffectAsync(async () => {
     if (!user) {
-      const response = await fetch('/api/session');
+      const response = await fetch(buildApiUrl('/session'));
       if (response.ok) {
         dispatch(sessionActions.updateUser(await response.json()));
       } else if (newServer) {

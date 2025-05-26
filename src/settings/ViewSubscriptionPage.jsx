@@ -23,6 +23,7 @@ import { useTranslation } from '../common/components/LocalizationProvider';
 import PageLayout from '../common/components/PageLayout';
 import SettingsMenu from './components/SettingsMenu';
 import { formatTime } from '../common/util/formatter';
+import { buildApiUrl } from '../config/apiConfig';
 
 const ViewSubscriptionPage = () => {
   const t = useTranslation();
@@ -101,15 +102,12 @@ const ViewSubscriptionPage = () => {
               console.warn('Failed to fetch user data');
             }
 
-            // Fetch devices with subscriptionId attribute matching this subscription
-            const devicesResponse = await fetch('/api/devices');
+            // Fetch user devices
+            const devicesResponse = await fetch(buildApiUrl('/devices'));
             if (devicesResponse.ok) {
-              const allDevices = await devicesResponse.json();
-              // Filter devices that belong to this subscription
-              const subscriptionDevices = allDevices.filter((device) => device.attributes && device.attributes.subscriptionId === id);
-              setDevices(subscriptionDevices);
+              setDevices(await devicesResponse.json());
             } else {
-              console.warn('Failed to fetch devices');
+              console.error('Failed to fetch devices');
             }
           } catch (err) {
             console.error('Error fetching related data:', err);

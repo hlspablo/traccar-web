@@ -15,7 +15,7 @@ import { sessionActions } from '../../store';
 import { useTranslation } from './LocalizationProvider';
 import { useRestriction } from '../util/permissions';
 import { nativePostMessage } from './NativeInterface';
-import { buildApiUrl } from '../../config/apiConfig';
+import { apiPut, apiDelete } from '../util/api';
 import { useCatch } from '../../reactHelper';
 
 const BottomMenu = () => {
@@ -64,15 +64,20 @@ const BottomMenu = () => {
             notificationTokens: tokens.length > 1 ? tokens.filter((it) => it !== notificationToken).join(',') : undefined,
           },
         };
-        await fetch(buildApiUrl(`/users/${user.id}`), {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(updatedUser),
-        });
+        try {
+          await apiPut(`/users/${user.id}`, updatedUser);
+        } catch (error) {
+          console.error('Error updating user notification tokens:', error);
+        }
       }
     }
 
-    await fetch(buildApiUrl('/session'), { method: 'DELETE' });
+    try {
+      await apiDelete('/session');
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+
     nativePostMessage('logout');
     navigate('/login');
     dispatch(sessionActions.updateUser(null));

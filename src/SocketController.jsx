@@ -10,7 +10,8 @@ import alarm from './resources/alarm.mp3';
 import { eventsActions } from './store/events';
 import useFeatures from './common/util/useFeatures';
 import { useAttributePreference } from './common/util/preferences';
-import { API_CONFIG, buildApiUrl } from './config/apiConfig';
+import { API_CONFIG } from './config/apiConfig';
+import { apiGet } from './common/util/api';
 
 const logoutCode = 4000;
 
@@ -45,19 +46,17 @@ const SocketController = () => {
       dispatch(sessionActions.updateSocket(false));
       if (event.code !== logoutCode) {
         try {
-          const devicesResponse = await fetch(buildApiUrl('/devices'));
-          if (devicesResponse.ok) {
-            dispatch(devicesActions.update(await devicesResponse.json()));
-          }
-          const positionsResponse = await fetch(buildApiUrl('/positions'));
-          if (positionsResponse.ok) {
-            dispatch(sessionActions.updatePositions(await positionsResponse.json()));
-          }
-          if (devicesResponse.status === 401 || positionsResponse.status === 401) {
+          const devicesData = await apiGet('/devices');
+          dispatch(devicesActions.update(devicesData));
+
+          const positionsData = await apiGet('/positions');
+          dispatch(sessionActions.updatePositions(positionsData));
+        } catch (error) {
+          // If unauthorized, redirect to login
+          if (error.message.includes('401')) {
             navigate('/login');
           }
-        } catch (error) {
-          // ignore errors
+          // ignore other errors
         }
         setTimeout(() => connectSocket(), 60000);
       }
@@ -89,19 +88,19 @@ const SocketController = () => {
 
   useEffectAsync(async () => {
     if (authenticated) {
-      const response = await fetch(buildApiUrl('/devices'));
-      if (response.ok) {
-        dispatch(devicesActions.refresh(await response.json()));
-      } else {
-        throw Error(await response.text());
+      try {
+        const data = await apiGet('/devices');
+        dispatch(devicesActions.refresh(data));
+        connectSocket();
+        return () => {
+          const socket = socketRef.current;
+          if (socket) {
+            socket.close(logoutCode);
+          }
+        };
+      } catch (error) {
+        console.error('Error loading devices:', error);
       }
-      connectSocket();
-      return () => {
-        const socket = socketRef.current;
-        if (socket) {
-          socket.close(logoutCode);
-        }
-      };
     }
     return null;
   }, [authenticated]);

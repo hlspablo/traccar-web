@@ -8,6 +8,7 @@ export const apiRequest = async (endpoint, options = {}) => {
   try {
     const url = buildApiUrl(endpoint);
     const response = await fetch(url, {
+      credentials: 'include',
       ...options,
       headers: {
         'Content-Type': 'application/json',
@@ -57,7 +58,7 @@ export const apiPut = (endpoint, data) => apiRequest(endpoint, {
 /**
  * DELETE request helper
  */
-export const apiDelete = (endpoint, data) => apiRequest(endpoint, {
+export const apiDelete = (endpoint, data = null) => apiRequest(endpoint, {
   method: 'DELETE',
   body: data ? JSON.stringify(data) : undefined,
 });

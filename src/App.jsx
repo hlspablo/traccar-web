@@ -11,7 +11,7 @@ import { sessionActions } from './store';
 import UpdateController from './UpdateController';
 import TermsDialog from './common/components/TermsDialog';
 import Loader from './common/components/Loader';
-import { buildApiUrl } from './config/apiConfig';
+import { apiGet, apiPut } from './common/util/api';
 
 const useStyles = makeStyles(() => ({
   page: {
@@ -36,27 +36,29 @@ const App = () => {
   const user = useSelector((state) => state.session.user);
 
   const acceptTerms = useCatch(async () => {
-    const response = await fetch(buildApiUrl(`/users/${user.id}`), {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...user, attributes: { ...user.attributes, termsAccepted: true } }),
-    });
-    if (response.ok) {
-      dispatch(sessionActions.updateUser(await response.json()));
-    } else {
-      throw Error(await response.text());
+    try {
+      const updatedUser = await apiPut(`/users/${user.id}`, {
+        ...user,
+        attributes: { ...user.attributes, termsAccepted: true },
+      });
+      dispatch(sessionActions.updateUser(updatedUser));
+    } catch (error) {
+      console.error('Error accepting terms:', error);
+      throw error;
     }
   });
 
   useEffectAsync(async () => {
     if (!user) {
-      const response = await fetch(buildApiUrl('/session'));
-      if (response.ok) {
-        dispatch(sessionActions.updateUser(await response.json()));
-      } else if (newServer) {
-        navigate('/register');
-      } else {
-        navigate('/login');
+      try {
+        const sessionData = await apiGet('/session');
+        dispatch(sessionActions.updateUser(sessionData));
+      } catch (error) {
+        if (newServer) {
+          navigate('/register');
+        } else {
+          navigate('/login');
+        }
       }
     }
     return null;

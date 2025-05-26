@@ -4,7 +4,7 @@ import {
   geofencesActions, groupsActions, driversActions, maintenancesActions, calendarsActions,
 } from './store';
 import { useEffectAsync } from './reactHelper';
-import { buildApiUrl } from './config/apiConfig';
+import { apiGet } from './common/util/api';
 
 const CachingController = () => {
   const authenticated = useSelector((state) => !!state.session.user);
@@ -12,55 +12,55 @@ const CachingController = () => {
 
   useEffectAsync(async () => {
     if (authenticated) {
-      const response = await fetch(buildApiUrl('/geofences'));
-      if (response.ok) {
-        dispatch(geofencesActions.refresh(await response.json()));
-      } else {
-        throw Error(await response.text());
+      try {
+        const data = await apiGet('/geofences');
+        dispatch(geofencesActions.refresh(data));
+      } catch (error) {
+        console.error('Error fetching geofences:', error);
       }
     }
   }, [authenticated]);
 
   useEffectAsync(async () => {
     if (authenticated) {
-      const response = await fetch(buildApiUrl('/groups'));
-      if (response.ok) {
-        dispatch(groupsActions.refresh(await response.json()));
-      } else {
-        throw Error(await response.text());
+      try {
+        const data = await apiGet('/groups');
+        dispatch(groupsActions.refresh(data));
+      } catch (error) {
+        console.error('Error fetching groups:', error);
       }
     }
   }, [authenticated]);
 
   useEffectAsync(async () => {
     if (authenticated) {
-      const response = await fetch(buildApiUrl('/drivers'));
-      if (response.ok) {
-        dispatch(driversActions.refresh(await response.json()));
-      } else {
-        throw Error(await response.text());
+      try {
+        const data = await apiGet('/drivers');
+        dispatch(driversActions.refresh(data));
+      } catch (error) {
+        console.error('Error fetching drivers:', error);
       }
     }
   }, [authenticated]);
 
   useEffectAsync(async () => {
     if (authenticated) {
-      const response = await fetch(buildApiUrl('/maintenance'));
-      if (response.ok) {
-        dispatch(maintenancesActions.refresh(await response.json()));
-      } else {
-        throw Error(await response.text());
+      try {
+        const data = await apiGet('/maintenance');
+        dispatch(maintenancesActions.refresh(data));
+      } catch (error) {
+        console.error('Error fetching maintenance:', error);
       }
     }
   }, [authenticated]);
 
   useEffectAsync(async () => {
     if (authenticated) {
-      const response = await fetch(buildApiUrl('/calendars'));
-      if (response.ok) {
-        dispatch(calendarsActions.refresh(await response.json()));
-      } else {
-        throw Error(await response.text());
+      try {
+        const data = await apiGet('/calendars');
+        dispatch(calendarsActions.refresh(data));
+      } catch (error) {
+        console.error('Error fetching calendars:', error);
       }
     }
   }, [authenticated]);

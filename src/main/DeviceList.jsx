@@ -6,7 +6,7 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 import { devicesActions } from '../store';
 import { useEffectAsync } from '../reactHelper';
 import DeviceRow from './DeviceRow';
-import { buildApiUrl } from '../config/apiConfig';
+import { apiGet } from '../common/util/api';
 
 const useStyles = makeStyles((theme) => ({
   list: {
@@ -37,13 +37,15 @@ const DeviceList = ({ devices }) => {
   }, []);
 
   useEffectAsync(async () => {
-    const response = await fetch(buildApiUrl('/devices'));
-    if (response.ok) {
-      dispatch(devicesActions.refresh(await response.json()));
-    } else {
-      throw Error(await response.text());
+    if (!devices.length) {
+      try {
+        const data = await apiGet('/devices');
+        dispatch(devicesActions.refresh(data));
+      } catch (error) {
+        console.error('Error fetching devices:', error);
+      }
     }
-  }, []);
+  }, [devices]);
 
   return (
     <AutoSizer className={classes.list}>

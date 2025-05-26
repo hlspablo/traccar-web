@@ -1,7 +1,7 @@
 import { Autocomplete, TextField } from '@mui/material';
 import React, { useState } from 'react';
 import { useEffectAsync } from '../../reactHelper';
-import { buildApiUrl } from '../config/apiConfig';
+import { buildApiUrl } from '../../config/apiConfig';
 
 const LinkField = ({
   label,
@@ -60,7 +60,7 @@ const LinkField = ({
         }));
       });
       oldValue.filter((it) => !newValue.includes(it)).forEach((removed) => {
-        results.push(fetch('/api/permissions', {
+        results.push(fetch(buildApiUrl('/permissions'), {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(createBody(removed)),

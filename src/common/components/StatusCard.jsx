@@ -152,14 +152,14 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
       name: t('sharedGeofence'),
       area: `CIRCLE (${position.latitude} ${position.longitude}, 50)`,
     };
-    const response = await fetch('/api/geofences', {
+    const response = await fetch(buildApiUrl('/geofences'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newItem),
     });
     if (response.ok) {
       const item = await response.json();
-      const permissionResponse = await fetch('/api/permissions', {
+      const permissionResponse = await fetch(buildApiUrl('/permissions'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ deviceId: position.deviceId, geofenceId: item.id }),

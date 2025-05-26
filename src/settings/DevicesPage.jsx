@@ -17,6 +17,7 @@ import { formatTime } from '../common/util/formatter';
 import { useAdministrator, useDeviceReadonly } from '../common/util/permissions';
 import useSettingsStyles from './common/useSettingsStyles';
 import DeviceUsersValue from './components/DeviceUsersValue';
+import { apiGet } from '../common/util/api';
 
 const DevicesPage = () => {
   const classes = useSettingsStyles();
@@ -38,12 +39,8 @@ const DevicesPage = () => {
     setLoading(true);
     try {
       const query = new URLSearchParams({ all: showAll });
-      const response = await fetch(`/devices?${query.toString()}`);
-      if (response.ok) {
-        setItems(await response.json());
-      } else {
-        throw Error(await response.text());
-      }
+      const items = await apiGet(`/devices?${query.toString()}`);
+      setItems(items);
     } finally {
       setLoading(false);
     }

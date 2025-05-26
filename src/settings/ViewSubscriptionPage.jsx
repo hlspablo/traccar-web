@@ -23,7 +23,6 @@ import { useTranslation } from '../common/components/LocalizationProvider';
 import PageLayout from '../common/components/PageLayout';
 import SettingsMenu from './components/SettingsMenu';
 import { formatTime } from '../common/util/formatter';
-import { buildApiUrl } from '../config/apiConfig';
 import { apiGet } from '../common/util/api';
 
 const ViewSubscriptionPage = () => {
@@ -99,12 +98,8 @@ const ViewSubscriptionPage = () => {
             setUser(userData);
 
             // Fetch user devices
-            const devicesResponse = await fetch(buildApiUrl('/devices'));
-            if (devicesResponse.ok) {
-              setDevices(await devicesResponse.json());
-            } else {
-              console.error('Failed to fetch devices');
-            }
+            const devices = await apiGet('/devices');
+            setDevices(devices);
           } catch (err) {
             console.error('Error fetching related data:', err);
           }

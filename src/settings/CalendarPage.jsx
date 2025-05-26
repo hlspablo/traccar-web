@@ -15,7 +15,7 @@ import { prefixString } from '../common/util/stringUtils';
 import { calendarsActions } from '../store';
 import { useCatch } from '../reactHelper';
 import useSettingsStyles from './common/useSettingsStyles';
-import { buildApiUrl } from '../config/apiConfig';
+import { apiGet } from '../common/util/api';
 
 const formatCalendarTime = (time) => {
   const tzid = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -89,12 +89,8 @@ const CalendarPage = () => {
   };
 
   const onItemSaved = useCatch(async () => {
-    const response = await fetch(buildApiUrl('/calendars'));
-    if (response.ok) {
-      dispatch(calendarsActions.refresh(await response.json()));
-    } else {
-      throw Error(await response.text());
-    }
+    const calendars = await apiGet('/calendars');
+    dispatch(calendarsActions.refresh(calendars));
   });
 
   const validate = () => item && item.name && item.data;

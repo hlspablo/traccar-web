@@ -1,16 +1,11 @@
 import { API_CONFIG, buildAsaasUrl } from '../../config/apiConfig';
 
 const handleResponse = async (response) => {
-  console.log('Response status:', response.status);
-
   if (!response.ok) {
-    console.error('API error response:', response.status, response.statusText);
     let errorData;
     try {
       errorData = await response.json();
-      console.error('API error details:', errorData);
     } catch (e) {
-      console.error('Could not parse error response as JSON');
       errorData = { message: 'Unknown error' };
     }
     throw new Error(errorData.message || `Request failed with status ${response.status}`);
@@ -18,11 +13,9 @@ const handleResponse = async (response) => {
 
   try {
     const data = await response.json();
-    console.log('API response data:', data);
     return data;
   } catch (e) {
-    console.error('Error parsing JSON response:', e);
-    throw new Error('Failed to parse API response');
+    throw new Error('Failed to parse API response', e);
   }
 };
 
@@ -48,7 +41,6 @@ const fetchWithConfig = async (endpoint, options = {}) => {
     clearTimeout(timeoutId);
     return response;
   } catch (error) {
-    console.error('Fetch error:', error);
     if (error.name === 'AbortError') {
       throw new Error('Request timeout - API call took too long to respond');
     }
@@ -58,26 +50,21 @@ const fetchWithConfig = async (endpoint, options = {}) => {
 
 class AsaasAPI {
   static async getSubscriptions(offset = 0, limit = 10) {
-    try {
-      const response = await fetchWithConfig(`/v3/subscriptions?offset=${offset}&limit=${limit}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+    const response = await fetchWithConfig(`/v3/subscriptions?offset=${offset}&limit=${limit}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-      const data = await handleResponse(response);
-      return {
-        data: data.data || [],
-        hasMore: data.hasMore || false,
-        totalCount: data.totalCount || 0,
-        limit: data.limit || limit,
-        offset: data.offset || offset,
-      };
-    } catch (error) {
-      console.error('Error fetching subscriptions:', error);
-      throw error;
-    }
+    const data = await handleResponse(response);
+    return {
+      data: data.data || [],
+      hasMore: data.hasMore || false,
+      totalCount: data.totalCount || 0,
+      limit: data.limit || limit,
+      offset: data.offset || offset,
+    };
   }
 
   // Helper method to handle API errors and provide error messages

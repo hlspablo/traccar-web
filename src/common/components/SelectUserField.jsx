@@ -4,7 +4,7 @@ import {
   Typography, Box,
 } from '@mui/material';
 import { useTranslation } from './LocalizationProvider';
-import { buildApiUrl } from '../config/apiConfig';
+import { buildApiUrl } from '../../config/apiConfig';
 
 const SelectUserField = ({ onChange, value, label, required }) => {
   const t = useTranslation();
@@ -30,8 +30,6 @@ const SelectUserField = ({ onChange, value, label, required }) => {
         } else {
           throw Error(await response.text());
         }
-      } catch (error) {
-        console.error('Error fetching users:', error);
       } finally {
         setLoading(false);
       }

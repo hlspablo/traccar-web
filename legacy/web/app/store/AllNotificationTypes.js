@@ -22,7 +22,7 @@ Ext.define('Traccar.store.AllNotificationTypes', {
 
     proxy: {
         type: 'rest',
-        url: 'api/notifications/types',
+        url: 'notifications/types',
         listeners: {
             exception: function (proxy, response) {
                 Traccar.app.showError(response);

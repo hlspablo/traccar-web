@@ -257,7 +257,7 @@ const PreferencesPage = () => {
                   multiple
                   value={attributes.soundEvents?.split(',') || []}
                   onChange={(e) => setAttributes({ ...attributes, soundEvents: e.target.value.join(',') })}
-                  endpoint="/api/notifications/types"
+                  endpoint="/notifications/types"
                   keyGetter={(it) => it.type}
                   titleGetter={(it) => t(prefixString('event', it.type))}
                   label={t('eventsSoundEvents')}

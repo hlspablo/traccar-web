@@ -66,7 +66,7 @@ const NotificationPage = () => {
               <SelectField
                 value={item.type}
                 onChange={(e) => setItem({ ...item, type: e.target.value })}
-                endpoint="/api/notifications/types"
+                endpoint="/notifications/types"
                 keyGetter={(it) => it.type}
                 titleGetter={(it) => t(prefixString('event', it.type))}
                 label={t('sharedType')}

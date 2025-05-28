@@ -23,7 +23,7 @@ const httpsAgent = new https.Agent({
 
 // Middleware
 app.use(cors({
-  origin: ['https://traccar-web-z4zr.onrender.com', 'http://localhost:3000'],
+  origin: ['https://coragemadm.top', 'https://www.coragemadm.top', 'https://traccar-web-z4zr.onrender.com', 'http://localhost:3000'],
   credentials: true,
 }));
 app.use(express.json());

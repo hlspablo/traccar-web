@@ -16,10 +16,10 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useTranslation } from '../../common/components/LocalizationProvider';
 
 const plans = [
-  { id: 'coragem1', name: 'Coragem Moto 1', value: 34.90 },
-  { id: 'coragem2', name: 'Coragem Moto 2', value: 44.90 },
-  { id: 'coragem3', name: 'Coragem Carro 1', value: 39.90 },
-  { id: 'coragem4', name: 'Coragem Carro 2', value: 49.90 },
+  { id: 'coragem1', name: 'Coragem Moto Essencial', value: 34.90 },
+  { id: 'coragem2', name: 'Coragem Moto Premium', value: 44.90 },
+  { id: 'coragem3', name: 'Coragem Carro Essencial', value: 49.90 },
+  { id: 'coragem4', name: 'Coragem Carro Premium', value: 59.90 },
   { id: 'custom', name: 'Personalizado', value: null },
 ];
 

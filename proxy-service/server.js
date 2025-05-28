@@ -7,8 +7,8 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Asaas API configuration
-const ASAAS_BASE_URL = 'https://api-sandbox.asaas.com';
-const ASAAS_ACCESS_TOKEN = process.env.ASAAS_ACCESS_TOKEN || '$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OmFjZTU1MTFjLWU1OTItNGZiYy05MGYwLTlhNGM2ZGU2ZDNhMDo6JGFhY2hfZTQyODE5MjEtNjljZi00YTAwLWIxNjgtZGQxNzk1ZTU1Nzky';
+const ASAAS_BASE_URL = 'https://api.asaas.com';
+const ASAAS_ACCESS_TOKEN = process.env.ASAAS_ACCESS_TOKEN || '';
 
 // Create HTTPS agent with simplified TLS configuration
 const httpsAgent = new https.Agent({

@@ -21,6 +21,7 @@ import PageLayout from '../common/components/PageLayout';
 import SettingsMenu from './components/SettingsMenu';
 import { formatTime } from '../common/util/formatter';
 import { apiGet } from '../common/util/api';
+import AsaasAPI from '../common/util/AsaasAPI';
 
 const SubscriptionsByUser = () => {
   const t = useTranslation();
@@ -32,49 +33,6 @@ const SubscriptionsByUser = () => {
   const [user, setUser] = useState(null);
   const [subscriptions, setSubscriptions] = useState([]);
   const [expanded, setExpanded] = useState(false);
-
-  // Helper function similar to the AsaasAPI utility
-  const fetchWithProxy = async (endpoint, options = {}) => {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000);
-
-      const response = await fetch(`/asaas-proxy${endpoint}`, {
-        ...options,
-        headers: {
-          ...options.headers,
-          access_token: '$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OmFjZTU1MTFjLWU1OTItNGZiYy05MGYwLTlhNGM2ZGU2ZDNhMDo6JGFhY2hfZTQyODE5MjEtNjljZi00YTAwLWIxNjgtZGQxNzk1ZTU1Nzky',
-        },
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-      return response;
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        throw new Error('Request timeout - API call took too long to respond');
-      }
-      throw error;
-    }
-  };
-
-  const handleResponse = async (response) => {
-    if (!response.ok) {
-      let errorData;
-      try {
-        errorData = await response.json();
-      } catch (e) {
-        errorData = { message: 'Unknown error' };
-      }
-      throw new Error(errorData.message || `Request failed with status ${response.status}`);
-    }
-
-    try {
-      return await response.json();
-    } catch (e) {
-      throw new Error('Failed to parse API response');
-    }
-  };
 
   const handleChange = (panel) => (event, isExpanded) => {
     setExpanded(isExpanded ? panel : false);
@@ -106,9 +64,8 @@ const SubscriptionsByUser = () => {
           return;
         }
 
-        // Fetch all subscriptions in parallel
-        const subscriptionPromises = subscriptionIds.map((subId) => fetchWithProxy(`/v3/subscriptions/${subId}`)
-          .then(handleResponse)
+        // Fetch all subscriptions in parallel using centralized API
+        const subscriptionPromises = subscriptionIds.map((subId) => AsaasAPI.getSubscriptionById(subId)
           .catch((error) => {
             console.error(`Error fetching subscription ${subId}:`, error);
             return null; // Return null for failed fetches

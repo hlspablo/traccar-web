@@ -24,6 +24,7 @@ import PageLayout from '../common/components/PageLayout';
 import SettingsMenu from './components/SettingsMenu';
 import { formatTime } from '../common/util/formatter';
 import { apiGet } from '../common/util/api';
+import AsaasAPI from '../common/util/AsaasAPI';
 
 const ViewSubscriptionPage = () => {
   const t = useTranslation();
@@ -36,57 +37,13 @@ const ViewSubscriptionPage = () => {
   const [user, setUser] = useState(null);
   const [devices, setDevices] = useState([]);
 
-  // Helper function similar to the AsaasAPI utility
-  const fetchWithProxy = async (endpoint, options = {}) => {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000);
-
-      const response = await fetch(`/asaas-proxy${endpoint}`, {
-        ...options,
-        headers: {
-          ...options.headers,
-          access_token: '$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OmFjZTU1MTFjLWU1OTItNGZiYy05MGYwLTlhNGM2ZGU2ZDNhMDo6JGFhY2hfZTQyODE5MjEtNjljZi00YTAwLWIxNjgtZGQxNzk1ZTU1Nzky',
-        },
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-      return response;
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        throw new Error('Request timeout - API call took too long to respond');
-      }
-      throw error;
-    }
-  };
-
-  const handleResponse = async (response) => {
-    if (!response.ok) {
-      let errorData;
-      try {
-        errorData = await response.json();
-      } catch (e) {
-        errorData = { message: 'Unknown error' };
-      }
-      throw new Error(errorData.message || `Request failed with status ${response.status}`);
-    }
-
-    try {
-      return await response.json();
-    } catch (e) {
-      throw new Error('Failed to parse API response');
-    }
-  };
-
   useEffect(() => {
     const fetchSubscriptionDetails = async () => {
       setLoading(true);
       setError(null);
       try {
         // Fetch subscription details from Asaas API
-        const response = await fetchWithProxy(`/v3/subscriptions/${id}`);
-        const data = await handleResponse(response);
+        const data = await AsaasAPI.getSubscriptionById(id);
         setSubscription(data);
 
         // If there's an externalReference, use it to fetch user and devices

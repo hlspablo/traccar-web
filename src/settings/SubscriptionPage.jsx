@@ -17,6 +17,11 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SaveIcon from '@mui/icons-material/Save';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider as MuiLocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
+import 'dayjs/locale/pt-br';
 import { useTranslation } from '../common/components/LocalizationProvider';
 import PageLayout from '../common/components/PageLayout';
 import SettingsMenu from './components/SettingsMenu';
@@ -35,8 +40,9 @@ const SubscriptionPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [nextDueDate, setNextDueDate] = useState(dayjs().add(1, 'day'));
 
-  const validate = () => item && item.type && item.userId && item.deviceIds && item.deviceIds.length > 0;
+  const validate = () => item && item.type && item.userId && item.deviceIds && item.deviceIds.length > 0 && nextDueDate && nextDueDate.isValid();
 
   // Handle user selection change
   const handleUserChange = (userId) => {
@@ -94,6 +100,11 @@ const SubscriptionPage = () => {
         cycle: item.type,
         deviceIds: item.deviceIds,
       };
+
+      // Only add nextDueDate if it's valid
+      if (nextDueDate && nextDueDate.isValid()) {
+        requestBody.nextDueDate = nextDueDate.format('YYYY-MM-DD');
+      }
 
       // Send the POST request to enable billing using the standard API pattern
       await apiPost(`/users/${item.userId}/enableBilling`, requestBody);
@@ -162,6 +173,15 @@ const SubscriptionPage = () => {
                   <MenuItem value="YEARLY">{t('subscriptionCycleYearly')}</MenuItem>
                 </Select>
               </FormControl>
+              <MuiLocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="pt-br">
+                <DatePicker
+                  label={t('nextDueDate')}
+                  value={nextDueDate}
+                  onChange={(newValue) => setNextDueDate(newValue)}
+                  minDate={dayjs()}
+                  format="DD/MM/YYYY"
+                />
+              </MuiLocalizationProvider>
             </AccordionDetails>
           </Accordion>
 

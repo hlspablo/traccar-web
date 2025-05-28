@@ -39,13 +39,13 @@ export const formatTime = (value, format) => {
     const secondConfig = { ...minuteConfig, second: '2-digit' };
     switch (format) {
       case 'date':
-        return d.toLocaleDateString(undefined, dateConfig);
+        return d.toLocaleDateString('pt-BR', dateConfig);
       case 'time':
-        return d.toLocaleTimeString(undefined, secondConfig);
+        return d.toLocaleTimeString('pt-BR', secondConfig);
       case 'minutes':
-        return d.toLocaleString(undefined, { ...dateConfig, ...minuteConfig });
+        return d.toLocaleString('pt-BR', { ...dateConfig, ...minuteConfig });
       default:
-        return d.toLocaleString(undefined, { ...dateConfig, ...secondConfig });
+        return d.toLocaleString('pt-BR', { ...dateConfig, ...secondConfig });
     }
   }
   return '';

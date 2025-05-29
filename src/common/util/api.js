@@ -8,8 +8,8 @@ export const apiRequest = async (endpoint, options = {}) => {
   try {
     const url = buildApiUrl(endpoint);
 
-    console.log(`🌐 API Request: ${options.method || 'GET'} ${url}`);
-    console.log('🍪 Current cookies:', document.cookie);
+    // console.log(`🌐 API Request: ${options.method || 'GET'} ${url}`);
+    // console.log('🍪 Current cookies:', document.cookie);
 
     // Prepare headers - don't set Content-Type for GET requests
     const headers = { ...options.headers };
@@ -23,7 +23,7 @@ export const apiRequest = async (endpoint, options = {}) => {
       headers,
     });
 
-    console.log(`📡 Response: ${response.status} ${response.statusText}`);
+    // console.log(`📡 Response: ${response.status} ${response.statusText}`);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -31,7 +31,7 @@ export const apiRequest = async (endpoint, options = {}) => {
 
       // Special handling for session-related errors
       if (response.status === 401 && endpoint.includes('/session')) {
-        console.log('🔓 Session expired or invalid - cookies will be cleared on next login');
+        // console.log('🔓 Session expired or invalid - cookies will be cleared on next login');
       }
 
       throw new Error(errorText || `Request failed with status ${response.status}`);

@@ -65,9 +65,7 @@ const SubscriptionsPage = () => {
     setLoading(true);
     setError(null);
     try {
-      console.log(`Fetching subscriptions with offset=${offset}, limit=${limit}...`);
       const response = await AsaasAPI.getSubscriptions(offset, limit);
-      console.log('API response:', response);
 
       if (response && response.data) {
         const mappedData = mapSubscriptionData(response.data);
@@ -76,16 +74,7 @@ const SubscriptionsPage = () => {
         // Update pagination info
         setHasMore(response.hasMore || false);
         setTotalCount(response.totalCount || 0);
-
-        console.log('Subscriptions loaded:', mappedData.length);
-        console.log('Pagination:', {
-          hasMore: response.hasMore,
-          totalCount: response.totalCount,
-          offset,
-          limit,
-        });
       } else {
-        console.error('Invalid API response:', response);
         setError('Invalid response format from API');
       }
     } catch (err) {

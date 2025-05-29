@@ -22,11 +22,9 @@ const useCustomerCache = () => {
           // Check if cache is still valid (within 1 day)
           if (now - cacheTimestamp < CACHE_DURATION) {
             setCustomerNames(data);
-            console.log('Loaded customer names from cache:', Object.keys(data).length, 'entries');
           } else {
             // Cache expired, clear it
             localStorage.removeItem(CACHE_KEY);
-            console.log('Customer names cache expired, cleared');
           }
         }
       } catch (error) {
@@ -47,7 +45,6 @@ const useCustomerCache = () => {
           timestamp: Date.now(),
         };
         localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
-        console.log('Saved customer names to cache:', Object.keys(customerNames).length, 'entries');
       } catch (error) {
         console.error('Error saving customer names to cache:', error);
       }
@@ -70,8 +67,6 @@ const useCustomerCache = () => {
         ...prev,
         [customerId]: customerName,
       }));
-
-      console.log(`Fetched customer name: ${customerId} -> ${customerName}`);
     } catch (err) {
       console.error(`Error fetching customer ${customerId}:`, err);
       const errorName = 'Erro ao carregar';
@@ -88,7 +83,6 @@ const useCustomerCache = () => {
   const clearCache = () => {
     localStorage.removeItem(CACHE_KEY);
     setCustomerNames({});
-    console.log('Customer names cache cleared');
   };
 
   // Check if customer name is cached

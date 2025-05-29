@@ -55,8 +55,9 @@ const ViewSubscriptionPage = () => {
             setUser(userData);
 
             // Fetch user devices
-            const devices = await apiGet('/devices');
-            setDevices(devices);
+            const devices = await apiGet(`/devices?userId=${userId}`);
+            const subscriptionDevices = devices.filter((device) => device.attributes?.subscriptionId === id);
+            setDevices(subscriptionDevices);
           } catch (err) {
             console.error('Error fetching related data:', err);
           }

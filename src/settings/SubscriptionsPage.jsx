@@ -273,23 +273,22 @@ const SubscriptionsPage = () => {
                 <TableCell>{item.externalReference || '-'}</TableCell>
                 <TableCell>{formatTime(item.expirationTime, 'date')}</TableCell>
                 <TableCell className={classes.columnAction} padding="none">
-                  <Button
-                    onClick={() => handleViewDetails(item.id)}
-                    size="small"
-                    startIcon={<LinkIcon fontSize="small" />}
-                    sx={{ mr: 1 }}
-                  >
-                    {t('sharedDetails')}
-                  </Button>
-                  <Button
-                    onClick={() => handleDeleteClick(item)}
-                    size="small"
-                    color="error"
-                    startIcon={<DeleteIcon fontSize="small" />}
-                    disabled={loading || deleting}
-                  >
-                    {t('sharedRemove')}
-                  </Button>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Button
+                      onClick={() => handleViewDetails(item.id)}
+                      size="small"
+                      startIcon={<LinkIcon fontSize="small" />}
+                    >
+                      Ver
+                    </Button>
+                    <IconButton
+                      onClick={() => handleDeleteClick(item)}
+                      size="small"
+                      disabled={loading || deleting}
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
                 </TableCell>
               </TableRow>
             )) : (<TableShimmer columns={8} endAction />)}

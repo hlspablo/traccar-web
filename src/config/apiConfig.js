@@ -19,7 +19,7 @@ export const API_CONFIG = {
     : 'https://assass-proxy.onrender.com', // Replace with your actual deployed proxy URL
 
   // Asaas Access Token (handled by proxy service for security)
-  ASAAS_ACCESS_TOKEN: '', // Not needed in frontend when using proxy
+  ASAAS_ACCESS_TOKEN: '$aact_prod_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OmE5OTBmMTNiLWQ1OWQtNGE3My1iNzk2LWMyODEyNmUwNTE1ZTo6JGFhY2hfYTBhNjc1MmQtMWQ4Ny00OWJiLTg3M2QtZmY3MDBkYzA1Yjc0', // Not needed in frontend when using proxy
 };
 
 // Helper function to build full API URL

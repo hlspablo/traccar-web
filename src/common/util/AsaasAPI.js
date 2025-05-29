@@ -78,6 +78,17 @@ class AsaasAPI {
     return handleResponse(response);
   }
 
+  static async getCustomerById(id) {
+    const response = await fetchWithConfig(`/v3/customers/${id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    return handleResponse(response);
+  }
+
   // Helper method to handle API errors and provide error messages
   static handleError(error) {
     if (error.response) {

@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => ({
         '/api/socket': 'ws://coragemserver.top',
         '/api': 'http://coragemserver.top',
         '/asaas-proxy': {
-          target: 'https://api-sandbox.asaas.com',
+          target: 'https://api.asaas.com',
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/asaas-proxy/, ''),
         },

@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Table, TableRow, TableCell, TableHead, TableBody,
-  Snackbar, Alert, Button, Box, Typography,
+  Snackbar, Alert, Button, Box, Typography, IconButton,
+  Tooltip, CircularProgress,
 } from '@mui/material';
 import LinkIcon from '@mui/icons-material/Link';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
+import PersonIcon from '@mui/icons-material/Person';
 import { formatTime } from '../common/util/formatter';
 import { useTranslation } from '../common/components/LocalizationProvider';
 import PageLayout from '../common/components/PageLayout';
@@ -17,6 +19,7 @@ import TableShimmer from '../common/components/TableShimmer';
 import SearchHeader, { filterByKeyword } from './components/SearchHeader';
 import useSettingsStyles from './common/useSettingsStyles';
 import AsaasAPI from '../common/util/AsaasAPI';
+import useCustomerCache from '../common/util/useCustomerCache';
 
 const SubscriptionsPage = () => {
   const classes = useSettingsStyles();
@@ -34,6 +37,14 @@ const SubscriptionsPage = () => {
   const [limit] = useState(10);
   const [hasMore, setHasMore] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
+
+  // Use customer cache hook
+  const {
+    fetchCustomerName,
+    isCustomerCached,
+    isCustomerLoading,
+    getCustomerName,
+  } = useCustomerCache();
 
   // Convert Asaas API subscription data to our app's format
   const mapSubscriptionData = (apiData) => apiData.map((subscription) => ({
@@ -155,7 +166,32 @@ const SubscriptionsPage = () => {
                   {item.price.toFixed(2)}
                 </TableCell>
                 <TableCell>{t(`subscriptionStatus${item.status.charAt(0).toUpperCase() + item.status.slice(1)}`)}</TableCell>
-                <TableCell>{item.customer}</TableCell>
+                <TableCell>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="body2">{item.customer}</Typography>
+                    <Tooltip title={isCustomerCached(item.customer) ? 'Nome carregado' : 'Carregar nome do cliente'}>
+                      <IconButton
+                        size="small"
+                        onClick={() => fetchCustomerName(item.customer)}
+                        disabled={isCustomerLoading(item.customer)}
+                        color={isCustomerCached(item.customer) ? 'success' : 'default'}
+                      >
+                        {isCustomerLoading(item.customer) ? (
+                          <CircularProgress size={16} />
+                        ) : (
+                          <PersonIcon fontSize="small" />
+                        )}
+                      </IconButton>
+                    </Tooltip>
+                    {getCustomerName(item.customer) && (
+                      <Typography variant="body2" color="textSecondary">
+                        (
+                        {getCustomerName(item.customer)}
+                        )
+                      </Typography>
+                    )}
+                  </Box>
+                </TableCell>
                 <TableCell>{item.externalReference || '-'}</TableCell>
                 <TableCell>{formatTime(item.expirationTime, 'date')}</TableCell>
                 <TableCell className={classes.columnAction} padding="none">

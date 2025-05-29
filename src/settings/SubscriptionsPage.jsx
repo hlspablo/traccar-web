@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import {
   Table, TableRow, TableCell, TableHead, TableBody,
   Snackbar, Alert, Button, Box, Typography, IconButton,
-  Tooltip, CircularProgress,
+  Tooltip, CircularProgress, Dialog, DialogTitle, DialogContent,
+  DialogContentText, DialogActions,
 } from '@mui/material';
 import LinkIcon from '@mui/icons-material/Link';
+import DeleteIcon from '@mui/icons-material/Delete';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
@@ -20,17 +23,25 @@ import SearchHeader, { filterByKeyword } from './components/SearchHeader';
 import useSettingsStyles from './common/useSettingsStyles';
 import AsaasAPI from '../common/util/AsaasAPI';
 import useCustomerCache from '../common/util/useCustomerCache';
+import { apiGet, apiPut } from '../common/util/api';
 
 const SubscriptionsPage = () => {
   const classes = useSettingsStyles();
   const navigate = useNavigate();
   const t = useTranslation();
 
+  const currentUser = useSelector((state) => state.session.user);
+
   const [timestamp, setTimestamp] = useState(Date.now());
   const [items, setItems] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Delete confirmation dialog state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [subscriptionToDelete, setSubscriptionToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   // Pagination state
   const [offset, setOffset] = useState(0);
@@ -95,6 +106,73 @@ const SubscriptionsPage = () => {
   // Handle refresh button click
   const handleRefresh = () => {
     setTimestamp(Date.now());
+  };
+
+  // Handle delete subscription
+  const handleDeleteClick = (subscription) => {
+    setSubscriptionToDelete(subscription);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false);
+    setSubscriptionToDelete(null);
+  };
+
+  // Update user attributes to remove subscription
+  const updateUserSubscriptionAttributes = async (subscriptionId) => {
+    try {
+      // Get current user data
+      const userData = await apiGet(`/users/${currentUser.id}`);
+
+      // Find and remove the subscription attribute
+      const updatedAttributes = { ...userData.attributes };
+
+      // Look for the subscription attribute key that matches the subscription ID
+      Object.keys(updatedAttributes).forEach((key) => {
+        if (key.startsWith('subscription_') && updatedAttributes[key] === subscriptionId) {
+          delete updatedAttributes[key];
+        }
+      });
+
+      // Update the user with modified attributes
+      const updatedUser = {
+        ...userData,
+        attributes: updatedAttributes,
+      };
+
+      await apiPut(`/users/${currentUser.id}`, updatedUser);
+    } catch (err) {
+      console.error('Error updating user attributes:', err);
+      throw new Error('Failed to update user subscription attributes');
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!subscriptionToDelete) return;
+
+    setDeleting(true);
+    try {
+      // Delete subscription from Asaas API
+      await AsaasAPI.deleteSubscription(subscriptionToDelete.id);
+
+      // Update user attributes to remove the subscription
+      await updateUserSubscriptionAttributes(subscriptionToDelete.id);
+
+      // Refresh the subscription list
+      setTimestamp(Date.now());
+
+      // Close dialog
+      setDeleteDialogOpen(false);
+      setSubscriptionToDelete(null);
+
+      // Show success message (optional - you can add a success state if needed)
+    } catch (err) {
+      console.error('Delete subscription error:', err);
+      setError(err.message || 'Failed to delete subscription');
+    } finally {
+      setDeleting(false);
+    }
   };
 
   // Navigate to subscription details
@@ -188,8 +266,18 @@ const SubscriptionsPage = () => {
                     onClick={() => handleViewDetails(item.id)}
                     size="small"
                     startIcon={<LinkIcon fontSize="small" />}
+                    sx={{ mr: 1 }}
                   >
                     {t('sharedDetails')}
+                  </Button>
+                  <Button
+                    onClick={() => handleDeleteClick(item)}
+                    size="small"
+                    color="error"
+                    startIcon={<DeleteIcon fontSize="small" />}
+                    disabled={loading || deleting}
+                  >
+                    {t('sharedRemove')}
                   </Button>
                 </TableCell>
               </TableRow>
@@ -247,6 +335,44 @@ const SubscriptionsPage = () => {
           {error}
         </Alert>
       </Snackbar>
+
+      {/* Delete confirmation dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleDeleteCancel}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogTitle id="delete-dialog-title">
+          {t('sharedRemove')}
+          {' '}
+          {t('settingsSubscription')}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-dialog-description">
+            {t('sharedRemoveConfirm')}
+            {' '}
+            {subscriptionToDelete?.id}
+            ?
+            <br />
+            <strong>{t('deviceDeleteWarning')}</strong>
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteCancel} disabled={deleting}>
+            {t('sharedCancel')}
+          </Button>
+          <Button
+            onClick={handleDeleteConfirm}
+            color="error"
+            variant="contained"
+            disabled={deleting}
+            startIcon={deleting ? <CircularProgress size={20} /> : <DeleteIcon />}
+          >
+            {deleting ? t('sharedLoading') : t('sharedRemove')}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <CollectionFab editPath="/settings/subscription" />
     </PageLayout>

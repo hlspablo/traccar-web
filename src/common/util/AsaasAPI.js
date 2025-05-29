@@ -89,6 +89,22 @@ class AsaasAPI {
     return handleResponse(response);
   }
 
+  static async deleteSubscription(id) {
+    const response = await fetchWithConfig(`/v3/subscriptions/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    // For DELETE requests, the API typically returns 200 OK or 204 No Content
+    if (response.status === 204) {
+      return { success: true };
+    }
+
+    return handleResponse(response);
+  }
+
   // Helper method to handle API errors and provide error messages
   static handleError(error) {
     if (error.response) {

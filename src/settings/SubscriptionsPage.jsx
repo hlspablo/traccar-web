@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
 import {
   Table, TableRow, TableCell, TableHead, TableBody,
   Snackbar, Alert, Button, Box, Typography, IconButton,
@@ -29,8 +28,6 @@ const SubscriptionsPage = () => {
   const classes = useSettingsStyles();
   const navigate = useNavigate();
   const t = useTranslation();
-
-  const currentUser = useSelector((state) => state.session.user);
 
   const [timestamp, setTimestamp] = useState(Date.now());
   const [items, setItems] = useState([]);
@@ -122,8 +119,22 @@ const SubscriptionsPage = () => {
   // Update user attributes to remove subscription
   const updateUserSubscriptionAttributes = async (subscriptionId) => {
     try {
-      // Get current user data
-      const userData = await apiGet(`/users/${currentUser.id}`);
+      // Find the subscription to get the customer information
+      const subscription = items.find((item) => item.id === subscriptionId);
+      if (!subscription || !subscription.externalReference) {
+        console.warn('Subscription not found or no external reference');
+        return;
+      }
+
+      // Extract user ID from external reference (format: "userId-deviceId")
+      const userId = subscription.externalReference.split('-')[0];
+      if (!userId) {
+        console.warn('Could not extract user ID from external reference');
+        return;
+      }
+
+      // Get the specific user data who owns the subscription
+      const userData = await apiGet(`/users/${userId}`);
 
       // Find and remove the subscription attribute
       const updatedAttributes = { ...userData.attributes };
@@ -141,7 +152,7 @@ const SubscriptionsPage = () => {
         attributes: updatedAttributes,
       };
 
-      await apiPut(`/users/${currentUser.id}`, updatedUser);
+      await apiPut(`/users/${userId}`, updatedUser);
     } catch (err) {
       console.error('Error updating user attributes:', err);
       throw new Error('Failed to update user subscription attributes');

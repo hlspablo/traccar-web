@@ -8,7 +8,7 @@ export const apiRequest = async (endpoint, options = {}) => {
   try {
     const url = buildApiUrl(endpoint);
 
-    // console.log(`🌐 API Request: ${options.method || 'GET'} ${url}`);
+    console.log(`🌐 API Request: ${options.method || 'GET'} ${url}`);
     // console.log('🍪 Current cookies:', document.cookie);
 
     // Prepare headers - don't set Content-Type for GET requests

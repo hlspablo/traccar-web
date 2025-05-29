@@ -16,6 +16,33 @@ export default defineConfig(({ mode }) => ({
           target: 'https://api.asaas.com',
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/asaas-proxy/, ''),
+          configure: (proxy) => {
+            proxy.on('proxyRes', (proxyRes) => {
+              if (proxyRes.headers['set-cookie']) {
+                const cookies = proxyRes.headers['set-cookie'].map((cookie) => {
+                  if (cookie.startsWith('JSESSIONID=') || cookie.startsWith('AWSALBTG=') || cookie.startsWith('AWSALBTGCORS=')) {
+                    // Modify the cookie to expire it immediately or change its path/domain
+                    // Simplest: just don't pass it along, or return an expired cookie
+                    // To effectively remove it, we can try to set it to expire in the past.
+                    // However, http-proxy might not allow direct removal.
+                    // A common tactic is to overwrite it with an expired one.
+                    // For now, let's log and see if we can prevent it.
+                    console.log(`[Vite Proxy] ASaaS tried to set cookie: ${cookie}`);
+                    // To effectively block it, we might need to remove it from the array
+                    // or return a modified cookie that's benign.
+                    // This part is tricky with http-proxy's direct manipulation.
+                    // A more robust way is to use a more powerful proxy or a custom middleware if Vite's built-in is limited.
+                    return cookie.replace(/Path=\//g, 'Path=/asaas-specific-path'); // Try to isolate path
+                  }
+                  return cookie;
+                });
+                // Filter out nulls if any cookies were meant to be removed
+                // proxyRes.headers['set-cookie'] = cookies.filter(c => c);
+                proxyRes.headers['set-cookie'] = cookies; // For now, just try path rewrite
+                console.log('[Vite Proxy] Modified ASaaS Set-Cookie headers:', proxyRes.headers['set-cookie']);
+              }
+            });
+          },
         },
       },
     }),

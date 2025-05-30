@@ -44,6 +44,22 @@ export default defineConfig(({ mode }) => ({
             });
           },
         },
+        '/zapsign-proxy': {
+          target: 'https://sandbox.api.zapsign.com.br/api/v1',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/zapsign-proxy/, ''),
+          configure: (proxy) => {
+            proxy.on('proxyReq', (proxyReq) => {
+              // Add Bearer token to ZapSign requests
+              const zapSignToken = '60f10aa5-26e5-4e5a-8021-c5ccb5e8f914ebe0d3b2-efa7-4589-96f9-ad0408384cce';
+              proxyReq.setHeader('Authorization', `Bearer ${zapSignToken}`);
+              console.log(`[Vite Proxy] ZapSign request to: ${proxyReq.path}`);
+            });
+            proxy.on('proxyRes', (proxyRes) => {
+              console.log(`[Vite Proxy] ZapSign response status: ${proxyRes.statusCode}`);
+            });
+          },
+        },
       },
     }),
   },

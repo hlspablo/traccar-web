@@ -164,6 +164,7 @@ const DevicePage = () => {
             </Accordion>
           )}
           <EditAttributesAccordion
+            type="device"
             attributes={item.attributes}
             setAttributes={(attributes) => setItem({ ...item, attributes })}
             definitions={{ ...commonDeviceAttributes, ...deviceAttributes }}

@@ -636,7 +636,7 @@
     "sharedReference": "Referência",
     "subscriptionId": "ID",
     "externalReference": "Referência",
-    "nextDueDate": "Próxima Cobrança",
+    "nextDueDate": "Primeira Cobrança",
     "subscriptionCycle": "Ciclo",
     "subscriptionCycleWeekly": "Semanal",
     "subscriptionCycleBiweekly": "Quinzenal",

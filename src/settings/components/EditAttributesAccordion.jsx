@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import {
   Button,
@@ -27,7 +27,7 @@ import {
 import useFeatures from '../../common/util/useFeatures';
 import useSettingsStyles from '../common/useSettingsStyles';
 
-const EditAttributesAccordion = ({ attribute, attributes, setAttributes, definitions, focusAttribute }) => {
+const EditAttributesAccordion = ({ attribute, attributes, setAttributes, definitions, focusAttribute, type }) => {
   const classes = useSettingsStyles();
   const t = useTranslation();
 
@@ -38,6 +38,44 @@ const EditAttributesAccordion = ({ attribute, attributes, setAttributes, definit
   const volumeUnit = useAttributePreference('volumeUnit');
 
   const [addDialogShown, setAddDialogShown] = useState(false);
+
+  // Add default attributes if they don't exist based on type
+  useEffect(() => {
+    if (!type) return; // Don't use default attributes if type is undefined
+
+    let defaultAttributes = {};
+
+    if (type === 'user') {
+      defaultAttributes = {
+        address: '',
+        contract: '',
+        cpf: '',
+        city: '',
+      };
+    } else if (type === 'device') {
+      defaultAttributes = {
+        plate: '',
+        color: '',
+      };
+    }
+
+    // Only proceed if we have default attributes for this type
+    if (Object.keys(defaultAttributes).length === 0) return;
+
+    const updatedAttributes = { ...attributes };
+    let hasChanges = false;
+
+    Object.keys(defaultAttributes).forEach((key) => {
+      if (!(key in updatedAttributes)) {
+        updatedAttributes[key] = defaultAttributes[key];
+        hasChanges = true;
+      }
+    });
+
+    if (hasChanges) {
+      setAttributes(updatedAttributes);
+    }
+  }, [attributes, setAttributes, type]);
 
   const updateAttribute = (key, value, type, subtype) => {
     const updatedAttributes = { ...attributes };

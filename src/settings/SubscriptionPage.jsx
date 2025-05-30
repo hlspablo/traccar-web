@@ -14,6 +14,8 @@ import {
   Alert,
   CircularProgress,
   Box,
+  FormControlLabel,
+  Checkbox,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SaveIcon from '@mui/icons-material/Save';
@@ -22,13 +24,15 @@ import { LocalizationProvider as MuiLocalizationProvider } from '@mui/x-date-pic
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import 'dayjs/locale/pt-br';
+import extenso from 'extenso';
 import { useTranslation } from '../common/components/LocalizationProvider';
 import PageLayout from '../common/components/PageLayout';
 import SettingsMenu from './components/SettingsMenu';
 import SelectUserField from '../common/components/SelectUserField';
 import SelectDeviceField from '../common/components/SelectDeviceField';
 import useSettingsStyles from './common/useSettingsStyles';
-import { apiPost } from '../common/util/api';
+import { apiGet, apiPost, apiPut } from '../common/util/api';
+import ZapSignAPI from '../common/util/ZapSignAPI';
 
 const SubscriptionPage = () => {
   const classes = useSettingsStyles();
@@ -41,6 +45,11 @@ const SubscriptionPage = () => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [nextDueDate, setNextDueDate] = useState(dayjs().add(1, 'day'));
+
+  // Contract creation states
+  const [createContract, setCreateContract] = useState(false);
+  const [sendEmail, setSendEmail] = useState(true);
+  const [sendWhatsapp, setSendWhatsapp] = useState(true);
 
   const validate = () => item && item.type && item.userId && item.deviceIds && item.deviceIds.length > 0 && nextDueDate && nextDueDate.isValid();
 
@@ -108,7 +117,142 @@ const SubscriptionPage = () => {
 
       // Send the POST request to enable billing using the standard API pattern
       await apiPost(`/users/${item.userId}/enableBilling`, requestBody);
-      setSuccess('Subscription created successfully');
+
+      // Create contract if checkbox is enabled
+      if (createContract) {
+        const user = await apiGet(`/users/${item.userId}`);
+        const devices = await apiGet(`/devices?userId=${item.userId}`);
+        const devicesFromUser = devices.filter((device) => item.deviceIds.includes(device.id));
+
+        // for each device, create a contract
+        const contractSuccess = [];
+        const contractError = [];
+        // format phone number from 86994547968 to (86) 99454-7968
+        const formattedPhone = user.phone.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+
+        // Use Promise.all with map instead of forEach to handle async operations properly
+        const contractPromises = devicesFromUser.map(async (device) => {
+          try {
+            // Create document via template using example data
+            const contractResult = await ZapSignAPI.createDocViaTemplate({
+              sendEmail,
+              sendWhatsapp,
+              signerName: user.name,
+              signerEmail: user.email,
+              signerPhoneCountry: '55',
+              signerPhoneNumber: user.phone,
+              data: [
+                {
+                  de: '{{NOME_PLANO}}',
+                  para: device.attributes.planName.toUpperCase(),
+                },
+                {
+                  de: '{{NOME_CLIENTE}}',
+                  para: user.name,
+                },
+                {
+                  de: '{{CPF_CLIENTE}}',
+                  para: user.attributes.cpf,
+                },
+                {
+                  de: '{{END_CLIENTE}}',
+                  para: user.attributes.address,
+                },
+                {
+                  de: '{{CIDADE_EST_CLIENTE}}',
+                  para: user.attributes.city,
+                },
+                {
+                  de: '{{TELEFONE_CLIENTE}}',
+                  para: formattedPhone,
+                },
+                {
+                  de: '{{EMAIL_CLIENTE}}',
+                  para: user.email,
+                },
+                {
+                  de: '{{PLACA}}',
+                  para: device.attributes.plate,
+                },
+                {
+                  de: '{{COR}}',
+                  para: device.attributes.color,
+                },
+                {
+                  de: '{{nome_plano_dois}}',
+                  para: device.attributes.planName,
+                },
+                {
+                  de: '{{VALOR_PLANO}}',
+                  para: device.attributes.planValue.toString(),
+                },
+                {
+                  de: '{{valor_extenso}}',
+                  para: extenso(device.attributes.planValue, {
+                    mode: 'currency',
+                  }),
+                },
+              ],
+            });
+
+            // Add additional signer if contract creation was successful
+            if (contractResult && contractResult.token) {
+              await ZapSignAPI.addSigner(contractResult.token, {
+                name: 'Marco Aurélio da Silva Leite',
+                email: 'aurelio@gmail.com',
+                phoneCountry: '55',
+                phoneNumber: '86994547968',
+                sendAutomaticEmail: true,
+                sendAutomaticWhatsapp: false,
+              });
+
+              // get first signer
+              const firstSigner = contractResult.signers[0];
+
+              // update user with contract attribute
+              // we need to pass the entire user object, not just the attributes
+              await apiPut(`/users/${item.userId}`, {
+                ...user,
+                attributes: {
+                  ...user.attributes,
+                  contract: firstSigner.sign_url,
+                },
+              });
+
+              return { success: true, deviceName: device.name };
+            }
+            return { success: false, deviceName: device.name };
+          } catch (error) {
+            console.error('Error creating contract for device:', device.name, error);
+            return { success: false, deviceName: device.name, error };
+          }
+        });
+
+        // Wait for all contract operations to complete
+        const contractResults = await Promise.all(contractPromises);
+
+        // Process results
+        contractResults.forEach((result) => {
+          if (result.success) {
+            contractSuccess.push(result.deviceName);
+          } else {
+            contractError.push(result.deviceName);
+          }
+        });
+
+        console.log('Contract Success:', contractSuccess);
+        console.log('Contract Error:', contractError);
+
+        if (contractSuccess.length > 0) {
+          setSuccess(`Assinatura ativada com sucesso para ${contractSuccess.length} dispositivos`);
+        }
+
+        if (contractError.length > 0) {
+          setError(`Houve erro na criação do contrato para ${contractError.length} dispositivos: ${contractError.join(', ')}`);
+        }
+      } else {
+        setSuccess('Assinatura ativada com sucesso');
+      }
 
       // Navigate to the subscriptions page after a delay
       setTimeout(() => {
@@ -182,6 +326,41 @@ const SubscriptionPage = () => {
                   format="DD/MM/YYYY"
                 />
               </MuiLocalizationProvider>
+
+              {/* Contract creation section */}
+              <FormControlLabel
+                control={(
+                  <Checkbox
+                    checked={createContract}
+                    onChange={(e) => setCreateContract(e.target.checked)}
+                  />
+                )}
+                label="Criar Contrato"
+              />
+
+              {/* Conditional checkboxes for email and WhatsApp */}
+              {createContract && (
+                <>
+                  <FormControlLabel
+                    control={(
+                      <Checkbox
+                        checked={sendEmail}
+                        onChange={(e) => setSendEmail(e.target.checked)}
+                      />
+                    )}
+                    label="Enviar e-mail"
+                  />
+                  <FormControlLabel
+                    control={(
+                      <Checkbox
+                        checked={sendWhatsapp}
+                        onChange={(e) => setSendWhatsapp(e.target.checked)}
+                      />
+                    )}
+                    label="Enviar WhatsApp"
+                  />
+                </>
+              )}
             </AccordionDetails>
           </Accordion>
 

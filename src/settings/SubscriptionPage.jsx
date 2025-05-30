@@ -200,9 +200,9 @@ const SubscriptionPage = () => {
             if (contractResult && contractResult.token) {
               await ZapSignAPI.addSigner(contractResult.token, {
                 name: 'Marco Aurélio da Silva Leite',
-                email: 'aurelio@gmail.com',
+                email: 'coragemrastro@gmail.com',
                 phoneCountry: '55',
-                phoneNumber: '86994547968',
+                phoneNumber: '86994161178',
                 sendAutomaticEmail: true,
                 sendAutomaticWhatsapp: false,
               });

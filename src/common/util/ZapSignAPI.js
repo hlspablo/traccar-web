@@ -81,7 +81,7 @@ class ZapSignAPI {
     brandLogo = 'https://coragemrastro.top/assets/coragem-logo-XnN66kJy.png',
     folderPath = 'Contratos',
     data = [],
-    templateId = '03c08f66-7963-4f86-9b68-c8e137e9d8d1',
+    templateId = '',
     ...otherFields
   }) {
     const payload = {

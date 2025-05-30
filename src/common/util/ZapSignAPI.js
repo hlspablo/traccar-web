@@ -98,7 +98,7 @@ class ZapSignAPI {
       ...otherFields,
     };
 
-    const response = await fetchWithConfig('models/create-doc/', {
+    const response = await fetchWithConfig('api/v1/models/create-doc/', {
       method: 'POST',
       body: JSON.stringify(payload),
     });
@@ -138,7 +138,7 @@ class ZapSignAPI {
       send_automatic_whatsapp: sendAutomaticWhatsapp,
     };
 
-    const response = await fetchWithConfig(`docs/${documentId}/add-signer/`, {
+    const response = await fetchWithConfig(`api/v1/docs/${documentId}/add-signer/`, {
       method: 'POST',
       body: JSON.stringify(payload),
     });

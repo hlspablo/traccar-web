@@ -135,6 +135,7 @@ const SubscriptionPage = () => {
           try {
             // Create document via template using example data
             const contractResult = await ZapSignAPI.createDocViaTemplate({
+              templateId: import.meta.env.VITE_ZAPSIGN_TEMPLATE_ID || '7a6f4ccc-874c-4744-aa0b-746109cdee8a',
               sendEmail,
               sendWhatsapp,
               signerName: user.name,

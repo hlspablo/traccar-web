@@ -61,4 +61,20 @@ export default (t) => useMemo(() => ({
     name: t('userTermsAccepted'),
     type: 'boolean',
   },
+  address: {
+    name: t('attributeAddress'),
+    type: 'string',
+  },
+  contract: {
+    name: t('attributeContract'),
+    type: 'string',
+  },
+  cpf: {
+    name: t('attributeCpf'),
+    type: 'string',
+  },
+  city: {
+    name: t('attributeCity'),
+    type: 'string',
+  },
 }), [t]);

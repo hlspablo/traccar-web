@@ -30,4 +30,24 @@ export default (t) => useMemo(() => ({
     name: t('attributeDeviceInactivityPeriod'),
     type: 'number',
   },
+  plate: {
+    name: t('attributePlate'),
+    type: 'string',
+  },
+  color: {
+    name: t('attributeColor'),
+    type: 'string',
+  },
+  planName: {
+    name: t('attributePlanName'),
+    type: 'string',
+  },
+  planValue: {
+    name: t('attributePlanValue'),
+    type: 'number',
+  },
+  subscriptionId: {
+    name: t('attributeSubscriptionId'),
+    type: 'string',
+  },
 }), [t]);

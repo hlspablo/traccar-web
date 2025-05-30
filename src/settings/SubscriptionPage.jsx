@@ -16,6 +16,10 @@ import {
   Box,
   FormControlLabel,
   Checkbox,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SaveIcon from '@mui/icons-material/Save';
@@ -48,6 +52,7 @@ const SubscriptionPage = () => {
 
   // Contract creation states
   const [createContract, setCreateContract] = useState(false);
+  const [createSubscription, setCreateSubscription] = useState(true);
   const [sendEmail, setSendEmail] = useState(true);
   const [sendWhatsapp, setSendWhatsapp] = useState(true);
 
@@ -104,19 +109,62 @@ const SubscriptionPage = () => {
     setSuccess(null);
 
     try {
-      // Create the request body
-      const requestBody = {
-        cycle: item.type,
-        deviceIds: item.deviceIds,
-      };
+      // Validate user and device data if creating contract
+      if (createContract) {
+        const user = await apiGet(`/users/${item.userId}`);
+        const devices = await apiGet(`/devices?userId=${item.userId}`);
+        const devicesFromUser = devices.filter((device) => item.deviceIds.includes(device.id));
 
-      // Only add nextDueDate if it's valid
-      if (nextDueDate && nextDueDate.isValid()) {
-        requestBody.nextDueDate = nextDueDate.format('YYYY-MM-DD');
+        // Check required user attributes
+        const missingUserFields = [];
+        if (!user.attributes?.cpf) missingUserFields.push('CPF');
+        if (!user.attributes?.address) missingUserFields.push('Endereço');
+        if (!user.attributes?.city) missingUserFields.push('Cidade');
+        if (!user.phone) missingUserFields.push('Telefone');
+
+        if (missingUserFields.length > 0) {
+          setError(`Informações obrigatórias do usuário estão faltando: ${missingUserFields.join(', ')}`);
+          setLoading(false);
+          return;
+        }
+
+        // Check required device attributes
+        const devicesWithMissingFields = [];
+        devicesFromUser.forEach((device) => {
+          const missingDeviceFields = [];
+          if (!device.attributes?.planName) missingDeviceFields.push('Nome do Plano');
+          if (!device.attributes?.planValue) missingDeviceFields.push('Valor do Plano');
+          if (!device.attributes?.plate) missingDeviceFields.push('Placa');
+          if (!device.attributes?.color) missingDeviceFields.push('Cor');
+
+          if (missingDeviceFields.length > 0) {
+            devicesWithMissingFields.push(`${device.name}: ${missingDeviceFields.join(', ')}`);
+          }
+        });
+
+        if (devicesWithMissingFields.length > 0) {
+          setError(`Informações obrigatórias dos dispositivos estão faltando:\n${devicesWithMissingFields.join('\n')}`);
+          setLoading(false);
+          return;
+        }
       }
 
-      // Send the POST request to enable billing using the standard API pattern
-      await apiPost(`/users/${item.userId}/enableBilling`, requestBody);
+      // Only enable billing if createSubscription is checked
+      if (createSubscription) {
+        // Create the request body
+        const requestBody = {
+          cycle: item.type,
+          deviceIds: item.deviceIds,
+        };
+
+        // Only add nextDueDate if it's valid
+        if (nextDueDate && nextDueDate.isValid()) {
+          requestBody.nextDueDate = nextDueDate.format('YYYY-MM-DD');
+        }
+
+        // Send the POST request to enable billing using the standard API pattern
+        await apiPost(`/users/${item.userId}/enableBilling`, requestBody);
+      }
 
       // Create contract if checkbox is enabled
       if (createContract) {
@@ -251,7 +299,7 @@ const SubscriptionPage = () => {
         if (contractError.length > 0) {
           setError(`Houve erro na criação do contrato para ${contractError.length} dispositivos: ${contractError.join(', ')}`);
         }
-      } else {
+      } else if (createSubscription) {
         setSuccess('Assinatura ativada com sucesso');
       }
 
@@ -332,6 +380,16 @@ const SubscriptionPage = () => {
               <FormControlLabel
                 control={(
                   <Checkbox
+                    checked={createSubscription}
+                    onChange={(e) => setCreateSubscription(e.target.checked)}
+                  />
+                )}
+                label="Criar Assinatura"
+              />
+
+              <FormControlLabel
+                control={(
+                  <Checkbox
                     checked={createContract}
                     onChange={(e) => setCreateContract(e.target.checked)}
                   />
@@ -378,16 +436,24 @@ const SubscriptionPage = () => {
           </div>
 
           {/* Error notification */}
-          <Snackbar
+          <Dialog
             open={!!error}
-            autoHideDuration={6000}
             onClose={() => setError(null)}
-            anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+            maxWidth="sm"
+            fullWidth
           >
-            <Alert onClose={() => setError(null)} severity="error" sx={{ width: '100%' }}>
-              {error}
-            </Alert>
-          </Snackbar>
+            <DialogTitle id="alert-dialog-title">Erro</DialogTitle>
+            <DialogContent>
+              <Typography style={{ whiteSpace: 'pre-line' }}>{error}</Typography>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setError(null)} color="primary">
+                Fechar
+              </Button>
+            </DialogActions>
+          </Dialog>
 
           {/* Success notification */}
           <Snackbar

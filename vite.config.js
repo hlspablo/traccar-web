@@ -13,6 +13,7 @@ export default defineConfig(({ mode }) => ({
         '/api/socket': 'ws://coragemserver.top',
         '/api': 'http://coragemserver.top',
         '/asaas-proxy': {
+          // check if mode is development
           target: 'https://api.asaas.com',
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/asaas-proxy/, ''),
